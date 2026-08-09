@@ -3,6 +3,9 @@
 An expenditure control system for a Ghanaian district education office, built
 as a CSIT622 capstone project.
 
+**Live system:** <https://govpay.win>
+Sign-in credentials appear on the sign-in page while demonstration mode is on.
+
 ---
 
 ## Contents
@@ -403,6 +406,8 @@ installs PHP dependencies with Composer, and produces a runtime image running
 nginx, PHP-FPM and a queue worker under supervisor.
 
 ### Steps
+
+The deployed instance runs at **https://govpay.win**.
 
 1. Generate an application key locally:
    ```bash

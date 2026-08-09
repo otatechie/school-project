@@ -26,5 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
         ]);
+
+        // Dokploy terminates TLS at its own proxy and forwards over HTTP.
+        // Without trusting it, Laravel would generate http:// redirects on an
+        // https:// site and every sign-in would bounce to a mixed-content URL.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {})->create();

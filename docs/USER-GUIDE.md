@@ -53,7 +53,7 @@ These are not suggestions. The system refuses.
 
 ## 2. Signing in
 
-1. Open the web address your administrator gave you.
+1. Open <https://govpay.win> in a web browser.
 2. Type your email address and password.
 3. Select **Log in**.
 

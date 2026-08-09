@@ -1,31 +1,33 @@
 # Documentation
 
-| Document | For whom | Covers |
+| Document | Audience | Covers |
 |---|---|---|
-| [USER-GUIDE.md](USER-GUIDE.md) | Finance officers, approvers, administrators | Signing in, the voucher lifecycle, roles, approving and paying, the ledger, memos, reports, administration, FAQ |
-| [TECHNICAL.md](TECHNICAL.md) | Developers | Stack, setup, data model, authorization, services, AI features, routes, frontend conventions, testing, known gaps |
-| [MVP-GUIDE.md](MVP-GUIDE.md) | Both | The original condensed overview |
+| [USER-GUIDE.md](USER-GUIDE.md) | Office staff | How to prepare, approve, pay and record a voucher, in plain language |
+| [PROJECT-DOCUMENTATION.md](PROJECT-DOCUMENTATION.md) | Assessors and developers | Problem, scope, architecture, security audit, AI implementation, deployment |
 
-## Formats
+PDF copies of both are in [`pdf/`](pdf/).
 
-Markdown is the source of truth. Rendered copies are generated from it:
-
-- `docs/pdf/` — print-ready A4 PDFs
-- `docs/html/` — self-contained HTML (no external assets)
-
-## Rebuilding
-
-Edit the Markdown, then:
+## Rebuilding the PDFs
 
 ```bash
-./docs/build.sh
+php docs/build-pdf.php
 ```
 
-Requires `node` and Google Chrome (run headless to print the PDFs). If Chrome
-lives elsewhere, pass its path:
+That writes an HTML file beside each Markdown source. Render them with headless
+Chrome:
 
 ```bash
-CHROME="/path/to/chrome" ./docs/build.sh
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --headless --disable-gpu --no-pdf-header-footer \
+  --print-to-pdf="docs/pdf/user-guide.pdf" \
+  "file://$PWD/docs/USER-GUIDE.html"
 ```
 
-Never edit files in `docs/html/` or `docs/pdf/` — the next build overwrites them.
+Delete the intermediate `.html` files afterwards — they are generated output
+and are not tracked.
+
+## Live system
+
+<https://govpay.win>
+
+Sign-in credentials are shown on the sign-in page while `DEMO_MODE=true`.
