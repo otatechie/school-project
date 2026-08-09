@@ -30,7 +30,7 @@ services:
 
             SESSION_DRIVER: database
             CACHE_STORE: database
-            QUEUE_CONNECTION: database
+            QUEUE_CONNECTION: sync
 
             LOG_CHANNEL: stderr
             LOG_LEVEL: ${LOG_LEVEL:-warning}
