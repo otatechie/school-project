@@ -14,7 +14,7 @@ one and configuring it as if it were the other is the most common cause of a
 | Uses `docker-compose.yml` | Yes | **No — ignored entirely** |
 | Creates a MySQL container | Yes, automatically | **No — you must create one** |
 | `DB_HOST` | `db` | the database service's own hostname |
-| Port to expose | handled by compose | must be set to **80** under Domains |
+| Port to expose | handled by compose | **8080** under Domains (Dokploy's default) |
 
 If your service was created as an **Application**, `docker-compose.yml` is not
 read at all. There is no `db` service, and `DB_HOST=db` resolves to nothing.
@@ -28,7 +28,7 @@ Dokploy creates both the app and its database from `docker-compose.yml`.
 1. Dokploy → your project → **Create Service** → **Compose**
 2. Point it at this repository; it will find `docker-compose.yml`
 3. Under **Environment**, paste the variables from `.env.docker.example`
-4. Under **Domains**, add `govpay.win` → service `app`, port `80`
+4. Under **Domains**, add `govpay.win` → service `app`, port `8080`
 5. Deploy
 
 `DB_HOST=db` is correct here — it is the name of the service in the compose
@@ -44,8 +44,8 @@ You are running only the app, so the database must exist separately.
    MySQL 8. Note the name you give it.
 2. Dokploy → **Create Service** → **Application**, pointing at this repository
    with build type **Dockerfile**.
-3. Under **Domains**, add `govpay.win` and set the **container port to 80**.
-   Without this Dokploy does not know where to send traffic.
+3. Under **Domains**, add `govpay.win`. The port is **8080**, which is
+   Dokploy's default, so it usually needs no change.
 4. Under **Environment**, set the variables below. `DB_HOST` must be the
    database service's hostname from step 1 — not `db`, and never `127.0.0.1`,
    which is the app container itself.
@@ -95,9 +95,8 @@ A 502 means the proxy reached your server but got no valid response. Work
 through these in order.
 
 **0. Is the domain pointing at the right port?**
-This is the most common cause and needs no redeploy. Dokploy → service →
-**Domains** → the **Port** column must be **80**. The container listens on 80;
-Dokploy defaults new domains to 8080, and nothing answers there.
+The container listens on **8080**, matching Dokploy's default for a new domain.
+Dokploy → service → **Domains** → the **Port** column must be **8080**.
 
 The give-away is a 502 in the browser while the logs look completely healthy:
 
@@ -105,7 +104,6 @@ The give-away is a 502 in the browser while the logs look completely healthy:
 NOTICE: fpm is running
 NOTICE: ready to handle connections
 INFO success: nginx entered RUNNING state
-Starting web server on port 80.
 ```
 
 If the container says it is serving and the proxy says bad gateway, they are
@@ -127,7 +125,8 @@ STARTUP PROBLEM: <what went wrong>
 
 **3. Is the port set?**
 On an Application deploy, Dokploy needs the container port under **Domains**.
-It is **80**. If this is blank, nothing is routed and every request is a 502.
+It is **8080**. If this is blank or wrong, nothing is routed and every request
+is a 502 no matter how healthy the container is.
 
 **4. Can the app reach the database?**
 The logs will say `Waiting for the database...` and then either `Running

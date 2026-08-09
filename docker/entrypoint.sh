@@ -61,5 +61,5 @@ php artisan view:cache || fail "view:cache failed; continuing uncached."
 
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
-echo "Starting web server on port 80."
+echo "Starting web server on port 8080."
 exec "$@"

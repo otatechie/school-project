@@ -172,7 +172,7 @@ RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \
              /var/cache/nginx/scgi_temp /run/nginx \
     && chown -R www-data:www-data /var/cache/nginx /run/nginx
 
-EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["entrypoint"]
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

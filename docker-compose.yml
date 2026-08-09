@@ -3,7 +3,7 @@
 # In Dokploy, create a Compose service pointing at this file and set the
 # environment variables listed in .env.docker.example under the service's
 # Environment tab. Dokploy supplies the domain and TLS termination, so the
-# app only needs to expose port 80 internally.
+# app only needs to expose port 8080 internally.
 
 services:
     app:
@@ -49,9 +49,9 @@ services:
         volumes:
             - app-storage:/var/www/html/storage/app
         expose:
-            - "80"
+            - "8080"
         healthcheck:
-            test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/up') ? 0 : 1);"]
+            test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/up') ? 0 : 1);"]
             interval: 30s
             timeout: 5s
             retries: 5
