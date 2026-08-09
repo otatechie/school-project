@@ -43,9 +43,19 @@ FROM node:22-bookworm-slim AS assets
 
 # PHP is a build tool here, not a runtime: the Wayfinder plugin needs `artisan`
 # to generate the route helpers before Vite can resolve their imports.
+#
+# Taken whole from the official PHP image rather than assembled from Debian
+# packages: Wayfinder boots the framework, so a single missing extension fails
+# the build with a Rollup stack trace that never names the real cause.
+COPY --from=php:8.4-cli /usr/local/bin/php /usr/local/bin/php
+COPY --from=php:8.4-cli /usr/local/lib/php /usr/local/lib/php
+COPY --from=php:8.4-cli /usr/local/etc/php /usr/local/etc/php
+
+# The interpreter is dynamically linked against these.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends php-cli php-xml php-mbstring \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends libxml2 libsqlite3-0 libonig5 libargon2-1 \
+    && rm -rf /var/lib/apt/lists/* \
+    && php -v
 
 WORKDIR /app
 
@@ -62,13 +72,19 @@ RUN npm ci --include=dev --include=optional --no-audit --no-fund
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
 
-# Route generation reads config, and Laravel refuses to boot without a key.
-# This one is used only to build assets and never reaches the runtime image.
-ENV APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
-    APP_ENV=production \
+ENV APP_ENV=production \
     NODE_OPTIONS=--max-old-space-size=4096
 
-RUN npm run build
+# The key is set for this command only, never as ENV: an ENV would bake it into
+# a layer and Docker rightly warns about it. It exists so Laravel can boot to
+# read the route table, and has nothing to do with the runtime key.
+#
+# SQLite over MySQL because no database is running during a build, and Laravel
+# resolves the default connection at boot even though no query is made.
+RUN APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
+    DB_CONNECTION=sqlite \
+    DB_DATABASE=:memory: \
+    npm run build
 
 # A successful exit with no manifest means Vite wrote nothing — catch it here,
 # where it costs a failed build, rather than serving a page with no styles or
@@ -122,9 +138,18 @@ RUN chmod +x /usr/local/bin/entrypoint
 # The scripts skipped during composer install; artisan is available now.
 RUN php artisan package:discover --ansi
 
-RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views \
+             storage/app/private storage/logs bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+
+# nginx's temp paths, relocated in nginx.conf away from the package default
+# that only the `nginx` user can write. These spool upload bodies, so without
+# them every document upload fails with EACCES inside nginx.
+RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \
+             /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp \
+             /var/cache/nginx/scgi_temp /run/nginx \
+    && chown -R www-data:www-data /var/cache/nginx /run/nginx
 
 EXPOSE 80
 
