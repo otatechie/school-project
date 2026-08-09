@@ -119,7 +119,14 @@ const adminNav: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    const isAdmin = auth.user?.role === 'admin';
+    const can = auth.can;
+
+    // The approval queue is only actionable by approvers; for everyone else it
+    // is a list of vouchers they cannot decide on.
+    const payments = operationsNav.filter(
+        (item) =>
+            item.title !== 'Awaiting approval' || can?.reviewVouchers === true,
+    );
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -136,11 +143,13 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={operationsNav} label="Payments" />
+                <NavMain items={payments} label="Payments" />
                 <NavMain items={recordsNav} label="Records" />
                 {/* Administration is authorised server-side; hiding it here
                     keeps the sidebar honest rather than offering dead ends. */}
-                {isAdmin && <NavMain items={adminNav} label="Administration" />}
+                {can?.manageStaff && (
+                    <NavMain items={adminNav} label="Administration" />
+                )}
             </SidebarContent>
 
             <SidebarFooter>

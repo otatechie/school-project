@@ -1,4 +1,4 @@
-import {Head, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import {
     CheckCircle2,
     Clock,
@@ -24,8 +24,8 @@ import paymentVouchers from '@/routes/payment-vouchers';
 import type { BreadcrumbItem, Paginated } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Payment Vouchers', href: paymentVouchers.index().url },
-    { title: 'Pending Approval', href: '#' },
+    { title: 'Payment vouchers', href: paymentVouchers.index().url },
+    { title: 'Awaiting approval', href: '#' },
 ];
 
 type Voucher = {
@@ -85,7 +85,6 @@ export default function Pending({
     routing,
     aiEnabled,
 }: Props) {
-
     const [searchQuery, setSearchQuery] = useState('');
     const [rejectingFor, setRejectingFor] = useState<string | null>(null);
     const [rejectionReason, setRejectionReason] = useState('');
@@ -207,13 +206,13 @@ export default function Pending({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Pending Approval" />
+            <Head title="Awaiting approval" />
             <div className="flex h-full flex-1 flex-col gap-4 p-4 md:p-6">
                 <FlashMessages />
 
                 <header>
                     <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                        Pending Approval
+                        Awaiting approval
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
                         Review and decide on submitted vouchers.
@@ -340,7 +339,9 @@ export default function Pending({
                                                                     .department
                                                                     ?.name ??
                                                                     '—'}
-                                                                {' · Prepared by '}
+                                                                {
+                                                                    ' · Prepared by '
+                                                                }
                                                                 {voucher.creator
                                                                     ?.name ??
                                                                     '—'}
@@ -641,7 +642,7 @@ export default function Pending({
                                 })}
                             </ul>
                         )}
-                                <TablePagination page={vouchers} />
+                        <TablePagination page={vouchers} />
                     </CardContent>
                 </Card>
             </div>

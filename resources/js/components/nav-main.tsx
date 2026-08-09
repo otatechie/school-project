@@ -52,7 +52,9 @@ export function NavMain({
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton
                                 asChild={!!item.href}
-                                isActive={item.href ? isCurrentUrl(item.href) : false}
+                                isActive={
+                                    item.href ? isCurrentUrl(item.href) : false
+                                }
                                 tooltip={{ children: item.title }}
                             >
                                 {item.href ? (
@@ -112,7 +114,9 @@ function NavItemWithChildren({
                                 <SidebarMenuSubButton
                                     asChild
                                     isActive={
-                                        subItem.href ? isCurrentUrl(subItem.href) : false
+                                        subItem.href
+                                            ? isCurrentUrl(subItem.href)
+                                            : false
                                     }
                                 >
                                     {subItem.href ? (

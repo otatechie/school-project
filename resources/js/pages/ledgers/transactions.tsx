@@ -17,7 +17,7 @@ import ledgers from '@/routes/ledgers';
 import type { BreadcrumbItem, Paginated } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'General Ledger', href: ledgers.index().url },
+    { title: 'General ledger', href: ledgers.index().url },
     { title: 'Transactions', href: ledgers.transactions().url },
 ];
 
@@ -81,17 +81,17 @@ export default function LedgerTransactions({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Ledger Transactions" />
+            <Head title="Ledger transactions" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
                 <header className="space-y-1">
                     <Button variant="ghost" size="sm" asChild className="-ml-2">
                         <Link href={ledgers.index().url} className="gap-2">
                             <ArrowLeft className="h-4 w-4" />
-                            <span>Back to Ledger</span>
+                            <span>Back to ledger</span>
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                        Ledger Transactions
+                        Ledger transactions
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         All general ledger entries, in GHS.
@@ -193,11 +193,15 @@ export default function LedgerTransactions({
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
                                                     Reference
                                                 </th>
-                                                <th className="hidden lg:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">Date</th>
+                                                <th className="hidden px-4 py-3 text-left text-sm font-semibold text-black lg:table-cell dark:text-white">
+                                                    Date
+                                                </th>
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
                                                     Account
                                                 </th>
-                                                <th className="hidden md:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">Description</th>
+                                                <th className="hidden px-4 py-3 text-left text-sm font-semibold text-black md:table-cell dark:text-white">
+                                                    Description
+                                                </th>
                                                 <th className="px-4 py-3 text-right text-sm font-semibold text-black dark:text-white">
                                                     Debit
                                                 </th>
@@ -217,7 +221,7 @@ export default function LedgerTransactions({
                                                             {entry.reference}
                                                         </code>
                                                     </td>
-                                                    <td className="hidden lg:table-cell px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
+                                                    <td className="hidden px-4 py-3 text-sm whitespace-nowrap text-muted-foreground lg:table-cell">
                                                         {entry.entry_date_label}
                                                     </td>
                                                     <td className="px-4 py-3 whitespace-nowrap">
@@ -230,7 +234,7 @@ export default function LedgerTransactions({
                                                                 ?.name ?? '—'}
                                                         </span>
                                                     </td>
-                                                    <td className="hidden md:table-cell max-w-xs px-4 py-3 text-sm text-muted-foreground">
+                                                    <td className="hidden max-w-xs px-4 py-3 text-sm text-muted-foreground md:table-cell">
                                                         {entry.description}
                                                     </td>
                                                     <td className="px-4 py-3 text-right text-sm text-black tabular-nums dark:text-white">

@@ -18,7 +18,7 @@ import systemLogs from '@/routes/system-logs';
 import type { BreadcrumbItem, Paginated } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'System Audit Log', href: systemLogs.index().url },
+    { title: 'Audit log', href: systemLogs.index().url },
 ];
 
 type Log = {
@@ -65,11 +65,11 @@ export default function SystemLogsIndex({ logs, actions, filters }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="System Audit Log" />
+            <Head title="Audit log" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
                 <header>
                     <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                        System Audit Log
+                        Audit log
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
                         Every recorded action, newest first. Entries cannot be
@@ -173,8 +173,12 @@ export default function SystemLogsIndex({ logs, actions, filters }: Props) {
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
                                                     Description
                                                 </th>
-                                                <th className="hidden sm:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">User</th>
-                                                <th className="hidden lg:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">IP</th>
+                                                <th className="hidden px-4 py-3 text-left text-sm font-semibold text-black sm:table-cell dark:text-white">
+                                                    User
+                                                </th>
+                                                <th className="hidden px-4 py-3 text-left text-sm font-semibold text-black lg:table-cell dark:text-white">
+                                                    IP
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -197,11 +201,11 @@ export default function SystemLogsIndex({ logs, actions, filters }: Props) {
                                                     <td className="px-4 py-3 text-sm text-black dark:text-white">
                                                         {log.description}
                                                     </td>
-                                                    <td className="hidden sm:table-cell px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
+                                                    <td className="hidden px-4 py-3 text-sm whitespace-nowrap text-muted-foreground sm:table-cell">
                                                         {log.user?.name ??
                                                             'System'}
                                                     </td>
-                                                    <td className="hidden lg:table-cell px-4 py-3 font-mono text-sm text-muted-foreground">
+                                                    <td className="hidden px-4 py-3 font-mono text-sm text-muted-foreground lg:table-cell">
                                                         {log.ip_address ?? '—'}
                                                     </td>
                                                 </tr>

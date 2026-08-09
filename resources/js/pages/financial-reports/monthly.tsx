@@ -14,7 +14,7 @@ import financialReports from '@/routes/financial-reports';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Monthly Report', href: financialReports.monthly().url },
+    { title: 'Expenditure by month', href: financialReports.monthly().url },
 ];
 
 type Month = {
@@ -43,12 +43,12 @@ export default function MonthlyReport({ year, years, months, total }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Monthly Report" />
+            <Head title="Expenditure by month" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                            Monthly Expenditure
+                            Expenditure by month
                         </h1>
                         <p className="mt-1 text-sm text-muted-foreground">
                             Vouchers paid in {year}, in GHS.

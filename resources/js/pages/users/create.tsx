@@ -28,7 +28,7 @@ export default function UsersCreate({ departments, roles }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Add User" />
+            <Head title="Add staff member" />
             <UserForm
                 data={data}
                 setData={setData as never}
@@ -40,8 +40,8 @@ export default function UsersCreate({ departments, roles }: Props) {
                 }}
                 departments={departments}
                 roles={roles}
-                title="Add User"
-                submitLabel="Add user"
+                title="Add staff member"
+                submitLabel="Add staff member"
                 busyLabel="Adding..."
             />
         </AppLayout>

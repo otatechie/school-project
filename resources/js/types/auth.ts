@@ -16,8 +16,22 @@ export type User = {
     [key: string]: unknown;
 };
 
+/**
+ * Derived server-side from the same policies the controllers authorize
+ * against, so the interface can never offer an action the server refuses.
+ */
+export type Permissions = {
+    createVoucher: boolean;
+    createMemo: boolean;
+    reviewVouchers: boolean;
+    manageDepartments: boolean;
+    manageStaff: boolean;
+    viewAuditLog: boolean;
+};
+
 export type Auth = {
     user: User;
+    can: Permissions | null;
 };
 
 export type TwoFactorSetupData = {

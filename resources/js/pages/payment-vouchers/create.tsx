@@ -1,6 +1,7 @@
-import {Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
+import DateField from '@/components/date-field';
 import InputError from '@/components/input-error';
 import VoucherCheckPanel from '@/components/voucher-check-panel';
 import { useVoucherChecks } from '@/hooks/use-voucher-checks';
@@ -30,7 +31,7 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Payment Vouchers',
+        title: 'Payment vouchers',
         href: paymentVouchers.index().url,
     },
     {
@@ -111,7 +112,7 @@ export default function Create({ departments }: { departments: Department[] }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Payment Voucher" />
+            <Head title="New payment voucher" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
                 <FlashMessages />
                 <div className="space-y-2">
@@ -121,11 +122,11 @@ export default function Create({ departments }: { departments: Department[] }) {
                             className="gap-2"
                         >
                             <ArrowLeft className="h-4 w-4" />
-                            <span>Back to Payment Vouchers</span>
+                            <span>Back to Payment vouchers</span>
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                        Create Payment Voucher
+                        New payment voucher
                     </h1>
                 </div>
 
@@ -185,30 +186,17 @@ export default function Create({ departments }: { departments: Department[] }) {
                                 </h2>
 
                                 <div className="grid gap-x-5 gap-y-3.5 md:grid-cols-2">
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="voucher_date">
-                                            Voucher Date{' '}
-                                            <span className="text-destructive">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Input
-                                            id="voucher_date"
-                                            type="date"
-                                            value={data.voucher_date}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'voucher_date',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            required
-                                            autoFocus
-                                        />
-                                        <InputError
-                                            message={errors.voucher_date}
-                                        />
-                                    </div>
+                                    <DateField
+                                        id="voucher_date"
+                                        label="Voucher date"
+                                        value={data.voucher_date}
+                                        onChange={(v) =>
+                                            setData('voucher_date', v)
+                                        }
+                                        error={errors.voucher_date}
+                                        required
+                                        autoFocus
+                                    />
 
                                     <div className="space-y-1.5">
                                         <Label htmlFor="department_id">
@@ -267,7 +255,6 @@ export default function Create({ departments }: { departments: Department[] }) {
                                                     e.target.value,
                                                 )
                                             }
-                                            placeholder="Enter payee name"
                                             required
                                         />
                                         <InputError
@@ -331,7 +318,6 @@ export default function Create({ departments }: { departments: Department[] }) {
                                                     e.target.value,
                                                 )
                                             }
-                                            placeholder="Enter account number"
                                         />
                                         <InputError
                                             message={
@@ -435,7 +421,6 @@ export default function Create({ departments }: { departments: Department[] }) {
                                                         e.target.value,
                                                     )
                                                 }
-                                                placeholder="Enter cheque number"
                                             />
                                             <InputError
                                                 message={errors.cheque_number}
@@ -457,7 +442,6 @@ export default function Create({ departments }: { departments: Department[] }) {
                                                     e.target.value,
                                                 )
                                             }
-                                            placeholder="Optional reference number"
                                         />
                                         <InputError
                                             message={errors.payment_reference}
@@ -548,7 +532,6 @@ export default function Create({ departments }: { departments: Department[] }) {
                                                     e.target.value,
                                                 )
                                             }
-                                            placeholder="Optional budget code"
                                         />
                                         <InputError
                                             message={errors.budget_code}
@@ -579,7 +562,7 @@ export default function Create({ departments }: { departments: Department[] }) {
                                             Creating...
                                         </>
                                     ) : (
-                                        'Create Payment Voucher'
+                                        'New payment voucher'
                                     )}
                                 </Button>
                             </div>

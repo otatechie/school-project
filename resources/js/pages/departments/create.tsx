@@ -50,7 +50,7 @@ export default function Create() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Department" />
+            <Head title="New department" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 <div className="space-y-4">
                     <Button variant="ghost" size="sm" asChild className="-ml-2">
@@ -61,7 +61,7 @@ export default function Create() {
                     </Button>
                     <div>
                         <h1 className="text-3xl font-semibold text-black dark:text-white">
-                            Create Department
+                            New department
                         </h1>
                         <p className="mt-1 text-base text-muted-foreground">
                             Add a new department to the system
@@ -71,7 +71,7 @@ export default function Create() {
 
                 <Card className="max-w-2xl">
                     <CardHeader>
-                        <CardTitle>Department Information</CardTitle>
+                        <CardTitle>Department details</CardTitle>
                         <CardDescription>
                             Enter the details for the new department. All
                             required fields are marked with an asterisk (*).
@@ -222,7 +222,7 @@ export default function Create() {
                                             Creating...
                                         </>
                                     ) : (
-                                        'Create Department'
+                                        'New department'
                                     )}
                                 </Button>
                             </div>

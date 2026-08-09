@@ -170,6 +170,33 @@ export default function Dashboard({
 
     const actionableTotal = actionable.reduce((sum, i) => sum + i.count, 0);
 
+    const quickActions = [
+        {
+            allowed: auth.can?.createVoucher,
+            href: paymentVouchers.create().url,
+            icon: Receipt,
+            label: 'New payment voucher',
+        },
+        {
+            allowed: auth.can?.createMemo,
+            href: memos.create().url,
+            icon: Mail,
+            label: 'New memo',
+        },
+        {
+            allowed: true,
+            href: ledgers.transactions().url,
+            icon: BookOpen,
+            label: 'View transactions',
+        },
+        {
+            allowed: auth.can?.viewAuditLog,
+            href: systemLogs.index().url,
+            icon: History,
+            label: 'Audit log',
+        },
+    ].filter((action) => action.allowed);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -248,56 +275,35 @@ export default function Dashboard({
                     </section>
                 )}
 
-                {/* Quick actions - prominent, always visible */}
-                <section aria-labelledby="quick-actions-heading">
-                    <h2
-                        id="quick-actions-heading"
-                        className="text-sm font-medium tracking-wider text-muted-foreground uppercase"
-                    >
-                        Quick actions
-                    </h2>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                        <Button size="sm" className="gap-2" asChild>
-                            <Link href={paymentVouchers.create().url} prefetch>
-                                <Receipt className="h-4 w-4" />
-                                New payment voucher
-                            </Link>
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-2"
-                            asChild
+                {/* Quick actions — only what this person may actually do. */}
+                {quickActions.length > 0 && (
+                    <section aria-labelledby="quick-actions-heading">
+                        <h2
+                            id="quick-actions-heading"
+                            className="text-sm font-medium tracking-wider text-muted-foreground uppercase"
                         >
-                            <Link href={memos.create().url} prefetch>
-                                <Mail className="h-4 w-4" />
-                                New memo
-                            </Link>
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-2"
-                            asChild
-                        >
-                            <Link href={ledgers.transactions().url} prefetch>
-                                <BookOpen className="h-4 w-4" />
-                                View transactions
-                            </Link>
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-2"
-                            asChild
-                        >
-                            <Link href={systemLogs.index().url} prefetch>
-                                <History className="h-4 w-4" />
-                                System audit log
-                            </Link>
-                        </Button>
-                    </div>
-                </section>
+                            Quick actions
+                        </h2>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            {quickActions.map((action, index) => (
+                                <Button
+                                    key={action.href}
+                                    size="sm"
+                                    variant={
+                                        index === 0 ? 'default' : 'outline'
+                                    }
+                                    className="gap-2"
+                                    asChild
+                                >
+                                    <Link href={action.href} prefetch>
+                                        <action.icon className="h-4 w-4" />
+                                        {action.label}
+                                    </Link>
+                                </Button>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* End-to-end process chain - one continuous mental model */}
                 <section aria-labelledby="workflow-heading">

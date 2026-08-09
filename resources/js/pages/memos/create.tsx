@@ -1,6 +1,7 @@
-import {Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
+import DateField from '@/components/date-field';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
@@ -111,7 +112,7 @@ export default function Create({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Memo" />
+            <Head title="New memo" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 <div className="space-y-4">
                     <Button variant="ghost" size="sm" asChild className="-ml-2">
@@ -122,7 +123,7 @@ export default function Create({
                     </Button>
                     <div>
                         <h1 className="text-3xl font-semibold text-black dark:text-white">
-                            Create Memo
+                            New memo
                         </h1>
                         <p className="mt-1 text-base text-muted-foreground">
                             Create a new internal memorandum
@@ -132,7 +133,7 @@ export default function Create({
 
                 <Card className="max-w-4xl">
                     <CardHeader>
-                        <CardTitle>Memo Information</CardTitle>
+                        <CardTitle>Memo details</CardTitle>
                         <CardDescription>
                             Enter the details for this memo.
                         </CardDescription>
@@ -140,26 +141,15 @@ export default function Create({
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid gap-6 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label htmlFor="memo_date">
-                                        Memo date{' '}
-                                        <span className="text-destructive">
-                                            *
-                                        </span>
-                                    </Label>
-                                    <Input
-                                        id="memo_date"
-                                        type="date"
-                                        value={data.memo_date}
-                                        onChange={(e) =>
-                                            setData('memo_date', e.target.value)
-                                        }
-                                        required
-                                        autoFocus
-                                        disabled={processing}
-                                    />
-                                    <InputError message={errors.memo_date} />
-                                </div>
+                                <DateField
+                                    id="memo_date"
+                                    label="Memo date"
+                                    value={data.memo_date}
+                                    onChange={(v) => setData('memo_date', v)}
+                                    error={errors.memo_date}
+                                    required
+                                    autoFocus
+                                />
                                 <div className="space-y-2">
                                     <Label htmlFor="department_id">
                                         Department{' '}

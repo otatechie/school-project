@@ -1,4 +1,4 @@
-import {Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { FileText, Plus, Printer, Search } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ import FlashMessages from '@/components/flash-messages';
 import TablePagination from '@/components/table-pagination';
 import AppLayout from '@/layouts/app-layout';
 import memos from '@/routes/memos';
-import type { BreadcrumbItem, Paginated } from '@/types';
+import type { BreadcrumbItem, Paginated, SharedData } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Memos', href: memos.index().url },
@@ -41,6 +41,7 @@ type Props = {
 };
 
 export default function MemosIndex({ memos: data, stats, filters }: Props) {
+    const { auth } = usePage<SharedData>().props;
     const [searchQuery, setSearchQuery] = useState(filters.search ?? '');
     const [statusFilter, setStatusFilter] = useState(filters.status ?? 'all');
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -91,12 +92,14 @@ export default function MemosIndex({ memos: data, stats, filters }: Props) {
                             {stats.printed} printed
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href={memos.create().url} className="gap-2">
-                            <Plus className="h-4 w-4" />
-                            <span>New memo</span>
-                        </Link>
-                    </Button>
+                    {auth.can?.createMemo && (
+                        <Button asChild>
+                            <Link href={memos.create().url} className="gap-2">
+                                <Plus className="h-4 w-4" />
+                                <span>New memo</span>
+                            </Link>
+                        </Button>
+                    )}
                 </header>
 
                 <Card className="py-5">
@@ -199,11 +202,15 @@ export default function MemosIndex({ memos: data, stats, filters }: Props) {
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
                                                     Memo No.
                                                 </th>
-                                                <th className="hidden lg:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">Date</th>
+                                                <th className="hidden px-4 py-3 text-left text-sm font-semibold text-black lg:table-cell dark:text-white">
+                                                    Date
+                                                </th>
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
                                                     Subject
                                                 </th>
-                                                <th className="hidden md:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">To</th>
+                                                <th className="hidden px-4 py-3 text-left text-sm font-semibold text-black md:table-cell dark:text-white">
+                                                    To
+                                                </th>
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
                                                     Status
                                                 </th>
@@ -223,13 +230,13 @@ export default function MemosIndex({ memos: data, stats, filters }: Props) {
                                                             {memo.memo_number}
                                                         </code>
                                                     </td>
-                                                    <td className="hidden lg:table-cell px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
+                                                    <td className="hidden px-4 py-3 text-sm whitespace-nowrap text-muted-foreground lg:table-cell">
                                                         {memo.memo_date_label}
                                                     </td>
                                                     <td className="max-w-xs px-4 py-3 text-sm text-black dark:text-white">
                                                         {memo.subject}
                                                     </td>
-                                                    <td className="hidden md:table-cell px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
+                                                    <td className="hidden px-4 py-3 text-sm whitespace-nowrap text-muted-foreground md:table-cell">
                                                         {memo.to_name}
                                                     </td>
                                                     <td className="px-4 py-3">

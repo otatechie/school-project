@@ -38,7 +38,7 @@ import paymentVouchers from '@/routes/payment-vouchers';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Payment Vouchers', href: paymentVouchers.index().url },
+    { title: 'Payment vouchers', href: paymentVouchers.index().url },
 ];
 
 type Voucher = {
@@ -170,13 +170,13 @@ export default function Index({ vouchers, stats, filters }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Payment Vouchers" />
+            <Head title="Payment vouchers" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 <FlashMessages />
                 <div className="space-y-4">
                     <div>
                         <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                            Payment Vouchers
+                            Payment vouchers
                         </h1>
                     </div>
                     <div className="grid gap-4 md:grid-cols-4">
@@ -206,7 +206,7 @@ export default function Index({ vouchers, stats, filters }: Props) {
                     <CardHeader>
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <CardTitle>All Payment Vouchers</CardTitle>
+                                <CardTitle>All vouchers</CardTitle>
                                 <CardDescription className="mt-1">
                                     {page?.total ?? items.length} voucher
                                     {(page?.total ?? items.length) !== 1
@@ -223,7 +223,7 @@ export default function Index({ vouchers, stats, filters }: Props) {
                                     className="gap-2"
                                 >
                                     <Plus className="h-4 w-4" />
-                                    <span>Create Voucher</span>
+                                    <span>New payment voucher</span>
                                 </Link>
                             </Button>
                         </div>
@@ -313,7 +313,7 @@ export default function Index({ vouchers, stats, filters }: Props) {
                                             className="gap-2"
                                         >
                                             <Plus className="h-4 w-4" />
-                                            <span>Create Voucher</span>
+                                            <span>New payment voucher</span>
                                         </Link>
                                     </Button>
                                 )}
@@ -389,7 +389,9 @@ export default function Index({ vouchers, stats, filters }: Props) {
                                                         )}
                                                     </td>
                                                     <td className="hidden px-4 py-3 text-sm whitespace-nowrap text-muted-foreground lg:table-cell">
-                                                        {voucher.voucher_date_label}
+                                                        {
+                                                            voucher.voucher_date_label
+                                                        }
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-black dark:text-white">
                                                         {voucher.payee_name}
@@ -414,8 +416,7 @@ export default function Index({ vouchers, stats, filters }: Props) {
                                                         >
                                                             {STATUS_LABELS[
                                                                 voucher.status
-                                                            ] ??
-                                                                voucher.status}
+                                                            ] ?? voucher.status}
                                                         </Badge>
                                                     </td>
                                                     <td className="px-4 py-3">
@@ -450,7 +451,8 @@ export default function Index({ vouchers, stats, filters }: Props) {
                                                                                     voucher:
                                                                                         voucher.id,
                                                                                 },
-                                                                            ).url
+                                                                            )
+                                                                                .url
                                                                         }
                                                                         className="gap-1.5"
                                                                     >
@@ -470,7 +472,7 @@ export default function Index({ vouchers, stats, filters }: Props) {
                                 </table>
                             </div>
                         )}
-                                <TablePagination page={page} />
+                        <TablePagination page={page} />
                     </CardContent>
                 </Card>
             </div>

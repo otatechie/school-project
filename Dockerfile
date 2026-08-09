@@ -36,26 +36,33 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
 # ---------------------------------------------------------------------------
 # Stage 2 — frontend assets
 # ---------------------------------------------------------------------------
-# Debian, not Alpine: Tailwind v4 and Vite pull native binaries that are
-# published for glibc, and the musl builds are a common source of CI-only
-# failures.
-FROM node:22-bookworm-slim AS assets
-
-# PHP is a build tool here, not a runtime: the Wayfinder plugin needs `artisan`
-# to generate the route helpers before Vite can resolve their imports.
+# Built on the PHP image rather than the Node one, with Node added: PHP is a
+# dynamically linked binary, so copying it between images means chasing its
+# shared libraries one failed build at a time. Debian rather than Alpine
+# because Tailwind v4 and Vite pull native binaries published for glibc.
 #
-# Taken whole from the official PHP image rather than assembled from Debian
-# packages: Wayfinder boots the framework, so a single missing extension fails
-# the build with a Rollup stack trace that never names the real cause.
-COPY --from=php:8.4-cli /usr/local/bin/php /usr/local/bin/php
-COPY --from=php:8.4-cli /usr/local/lib/php /usr/local/lib/php
-COPY --from=php:8.4-cli /usr/local/etc/php /usr/local/etc/php
+# PHP is a build tool here, not a runtime: the Wayfinder plugin shells out to
+# `php artisan wayfinder:generate` to write the typed route helpers that every
+# page imports.
+FROM php:8.4-cli-bookworm AS assets
 
-# The interpreter is dynamically linked against these.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends libxml2 libsqlite3-0 libonig5 libargon2-1 \
-    && rm -rf /var/lib/apt/lists/* \
-    && php -v
+ENV NODE_VERSION=22.12.0
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends xz-utils; \
+    arch="$(dpkg --print-architecture)"; \
+    case "$arch" in \
+        amd64) node_arch='x64' ;; \
+        arm64) node_arch='arm64' ;; \
+        *) echo "unsupported architecture: $arch" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${node_arch}.tar.xz" \
+        | tar -xJ -C /usr/local --strip-components=1 --no-same-owner; \
+    rm -rf /var/lib/apt/lists/*; \
+    node --version; \
+    npm --version; \
+    php -v
 
 WORKDIR /app
 

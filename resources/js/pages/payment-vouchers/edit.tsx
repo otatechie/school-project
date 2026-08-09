@@ -1,13 +1,13 @@
-import {Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
+import DateField from '@/components/date-field';
 import InputError from '@/components/input-error';
 import VoucherAttachments, {
     type Attachment,
 } from '@/components/voucher-attachments';
 import VoucherCheckPanel from '@/components/voucher-check-panel';
 import { useVoucherChecks } from '@/hooks/use-voucher-checks';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -34,7 +34,7 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Payment Vouchers',
+        title: 'Payment vouchers',
         href: paymentVouchers.index().url,
     },
     {
@@ -147,7 +147,7 @@ export default function Edit({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Edit Payment Voucher" />
+            <Head title="Edit voucher" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
                 <FlashMessages />
                 <div className="space-y-2">
@@ -157,17 +157,12 @@ export default function Edit({
                             className="gap-2"
                         >
                             <ArrowLeft className="h-4 w-4" />
-                            <span>Back to Payment Vouchers</span>
+                            <span>Back to Payment vouchers</span>
                         </Link>
                     </Button>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                            Edit {voucher.voucher_number}
-                        </h1>
-                        <Badge variant="outline" className="capitalize">
-                            {voucher.status}
-                        </Badge>
-                    </div>
+                    <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
+                        Edit {voucher.voucher_number}
+                    </h1>
                 </div>
 
                 <Card className="max-w-3xl py-5">
@@ -226,30 +221,17 @@ export default function Edit({
                                 </h2>
 
                                 <div className="grid gap-x-5 gap-y-3.5 md:grid-cols-2">
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="voucher_date">
-                                            Voucher Date{' '}
-                                            <span className="text-destructive">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Input
-                                            id="voucher_date"
-                                            type="date"
-                                            value={data.voucher_date}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'voucher_date',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            required
-                                            autoFocus
-                                        />
-                                        <InputError
-                                            message={errors.voucher_date}
-                                        />
-                                    </div>
+                                    <DateField
+                                        id="voucher_date"
+                                        label="Voucher date"
+                                        value={data.voucher_date}
+                                        onChange={(v) =>
+                                            setData('voucher_date', v)
+                                        }
+                                        error={errors.voucher_date}
+                                        required
+                                        autoFocus
+                                    />
 
                                     <div className="space-y-1.5">
                                         <Label htmlFor="department_id">
@@ -308,7 +290,6 @@ export default function Edit({
                                                     e.target.value,
                                                 )
                                             }
-                                            placeholder="Enter payee name"
                                             required
                                         />
                                         <InputError
@@ -372,7 +353,6 @@ export default function Edit({
                                                     e.target.value,
                                                 )
                                             }
-                                            placeholder="Enter account number"
                                         />
                                         <InputError
                                             message={
@@ -476,7 +456,6 @@ export default function Edit({
                                                         e.target.value,
                                                     )
                                                 }
-                                                placeholder="Enter cheque number"
                                             />
                                             <InputError
                                                 message={errors.cheque_number}
@@ -498,7 +477,6 @@ export default function Edit({
                                                     e.target.value,
                                                 )
                                             }
-                                            placeholder="Optional reference number"
                                         />
                                         <InputError
                                             message={errors.payment_reference}
@@ -589,7 +567,6 @@ export default function Edit({
                                                     e.target.value,
                                                 )
                                             }
-                                            placeholder="Optional budget code"
                                         />
                                         <InputError
                                             message={errors.budget_code}

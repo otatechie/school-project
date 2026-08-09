@@ -1,4 +1,4 @@
-import {Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Plus, Search, UserCog } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ import FlashMessages from '@/components/flash-messages';
 import TablePagination from '@/components/table-pagination';
 import AppLayout from '@/layouts/app-layout';
 import users from '@/routes/users';
-import type { BreadcrumbItem, Paginated } from '@/types';
+import type { BreadcrumbItem, Paginated, SharedData } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Users', href: users.index().url },
@@ -46,6 +46,7 @@ export default function UsersIndex({
     stats,
     filters,
 }: Props) {
+    const { auth } = usePage<SharedData>().props;
     const [searchQuery, setSearchQuery] = useState(filters.search ?? '');
     const [roleFilter, setRoleFilter] = useState(filters.role ?? 'all');
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -73,14 +74,14 @@ export default function UsersIndex({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Users" />
+            <Head title="Staff" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
                 <FlashMessages />
 
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                            Users
+                            Staff
                         </h1>
                         <p className="mt-1 text-sm text-muted-foreground">
                             {stats.total} total &middot; {stats.active} active
@@ -89,12 +90,14 @@ export default function UsersIndex({
                                 : ''}
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href={users.create().url} className="gap-2">
-                            <Plus className="h-4 w-4" />
-                            <span>Add user</span>
-                        </Link>
-                    </Button>
+                    {auth.can?.manageStaff && (
+                        <Button asChild>
+                            <Link href={users.create().url} className="gap-2">
+                                <Plus className="h-4 w-4" />
+                                <span>Add staff member</span>
+                            </Link>
+                        </Button>
+                    )}
                 </header>
 
                 <Card className="py-5">
@@ -188,8 +191,12 @@ export default function UsersIndex({
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
                                                     Name
                                                 </th>
-                                                <th className="hidden sm:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">Staff ID</th>
-                                                <th className="hidden md:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">Department</th>
+                                                <th className="hidden px-4 py-3 text-left text-sm font-semibold text-black sm:table-cell dark:text-white">
+                                                    Staff ID
+                                                </th>
+                                                <th className="hidden px-4 py-3 text-left text-sm font-semibold text-black md:table-cell dark:text-white">
+                                                    Department
+                                                </th>
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
                                                     Role
                                                 </th>
@@ -215,10 +222,10 @@ export default function UsersIndex({
                                                             {user.email}
                                                         </span>
                                                     </td>
-                                                    <td className="hidden sm:table-cell px-4 py-3 font-mono text-sm whitespace-nowrap text-muted-foreground">
+                                                    <td className="hidden px-4 py-3 font-mono text-sm whitespace-nowrap text-muted-foreground sm:table-cell">
                                                         {user.staff_id ?? '—'}
                                                     </td>
-                                                    <td className="hidden md:table-cell px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
+                                                    <td className="hidden px-4 py-3 text-sm whitespace-nowrap text-muted-foreground md:table-cell">
                                                         {user.department
                                                             ?.name ?? '—'}
                                                     </td>

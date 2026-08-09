@@ -14,7 +14,10 @@ import financialReports from '@/routes/financial-reports';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Department Report', href: financialReports.department().url },
+    {
+        title: 'Expenditure by department',
+        href: financialReports.department().url,
+    },
 ];
 
 type Row = {
@@ -51,12 +54,12 @@ export default function DepartmentReport({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Department Report" />
+            <Head title="Expenditure by department" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                            Expenditure by Department
+                            Expenditure by department
                         </h1>
                         <p className="mt-1 text-sm text-muted-foreground">
                             Vouchers paid in {year}, in GHS.

@@ -1,4 +1,4 @@
-import {Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Building2, Plus, Search } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,7 @@ import FlashMessages from '@/components/flash-messages';
 import AppLayout from '@/layouts/app-layout';
 import departments from '@/routes/departments';
 import TablePagination from '@/components/table-pagination';
-import type { BreadcrumbItem, Paginated } from '@/types';
+import type { BreadcrumbItem, Paginated, SharedData } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Departments', href: departments.index().url },
@@ -35,6 +35,7 @@ export default function DepartmentsIndex({
     stats,
     filters,
 }: Props) {
+    const { auth } = usePage<SharedData>().props;
     const [searchQuery, setSearchQuery] = useState(filters.search ?? '');
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -71,12 +72,17 @@ export default function DepartmentsIndex({
                             {stats.total} total &middot; {stats.active} active
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href={departments.create().url} className="gap-2">
-                            <Plus className="h-4 w-4" />
-                            <span>New department</span>
-                        </Link>
-                    </Button>
+                    {auth.can?.manageDepartments && (
+                        <Button asChild>
+                            <Link
+                                href={departments.create().url}
+                                className="gap-2"
+                            >
+                                <Plus className="h-4 w-4" />
+                                <span>New department</span>
+                            </Link>
+                        </Button>
+                    )}
                 </header>
 
                 <Card className="py-5">
@@ -142,85 +148,87 @@ export default function DepartmentsIndex({
                         ) : (
                             <>
                                 <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="border-b border-border bg-muted/30">
-                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
-                                                Department
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
-                                                Code
-                                            </th>
-                                            <th className="hidden px-4 py-3 text-right text-sm font-semibold text-black sm:table-cell dark:text-white">
-                                                Staff
-                                            </th>
-                                            <th className="hidden px-4 py-3 text-right text-sm font-semibold text-black sm:table-cell dark:text-white">
-                                                Vouchers
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
-                                                Status
-                                            </th>
-                                            <th className="px-4 py-3 text-right text-sm font-semibold text-black dark:text-white">
-                                                <span className="sr-only">Actions</span>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {items.map((dept) => (
-                                            <tr
-                                                key={dept.id}
-                                                className="border-b border-border transition-colors hover:bg-muted/50"
-                                            >
-                                                <td className="px-4 py-3 text-sm text-black dark:text-white">
-                                                    {dept.name}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <code className="rounded-md bg-muted px-2 py-1 font-mono text-sm font-medium text-muted-foreground">
-                                                        {dept.code}
-                                                    </code>
-                                                </td>
-                                                <td className="hidden px-4 py-3 text-right text-sm text-muted-foreground tabular-nums sm:table-cell">
-                                                    {dept.users_count}
-                                                </td>
-                                                <td className="hidden px-4 py-3 text-right text-sm text-muted-foreground tabular-nums sm:table-cell">
-                                                    {
-                                                        dept.payment_vouchers_count
-                                                    }
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <Badge
-                                                        variant={
-                                                            dept.is_active
-                                                                ? 'secondary'
-                                                                : 'outline'
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="border-b border-border bg-muted/30">
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
+                                                    Department
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
+                                                    Code
+                                                </th>
+                                                <th className="hidden px-4 py-3 text-right text-sm font-semibold text-black sm:table-cell dark:text-white">
+                                                    Staff
+                                                </th>
+                                                <th className="hidden px-4 py-3 text-right text-sm font-semibold text-black sm:table-cell dark:text-white">
+                                                    Vouchers
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
+                                                    Status
+                                                </th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold text-black dark:text-white">
+                                                    <span className="sr-only">
+                                                        Actions
+                                                    </span>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {items.map((dept) => (
+                                                <tr
+                                                    key={dept.id}
+                                                    className="border-b border-border transition-colors hover:bg-muted/50"
+                                                >
+                                                    <td className="px-4 py-3 text-sm text-black dark:text-white">
+                                                        {dept.name}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <code className="rounded-md bg-muted px-2 py-1 font-mono text-sm font-medium text-muted-foreground">
+                                                            {dept.code}
+                                                        </code>
+                                                    </td>
+                                                    <td className="hidden px-4 py-3 text-right text-sm text-muted-foreground tabular-nums sm:table-cell">
+                                                        {dept.users_count}
+                                                    </td>
+                                                    <td className="hidden px-4 py-3 text-right text-sm text-muted-foreground tabular-nums sm:table-cell">
+                                                        {
+                                                            dept.payment_vouchers_count
                                                         }
-                                                    >
-                                                        {dept.is_active
-                                                            ? 'Active'
-                                                            : 'Inactive'}
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        asChild
-                                                    >
-                                                        <Link
-                                                            href={
-                                                                departments.edit(
-                                                                    dept.id,
-                                                                ).url
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <Badge
+                                                            variant={
+                                                                dept.is_active
+                                                                    ? 'secondary'
+                                                                    : 'outline'
                                                             }
                                                         >
-                                                            Edit
-                                                        </Link>
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                                            {dept.is_active
+                                                                ? 'Active'
+                                                                : 'Inactive'}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            asChild
+                                                        >
+                                                            <Link
+                                                                href={
+                                                                    departments.edit(
+                                                                        dept.id,
+                                                                    ).url
+                                                                }
+                                                            >
+                                                                Edit
+                                                            </Link>
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                                 <TablePagination page={data} />
                             </>

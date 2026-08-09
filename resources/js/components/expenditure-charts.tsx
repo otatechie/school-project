@@ -218,7 +218,11 @@ export function DepartmentExpenditureChart({
                             cursor={{ fill: 'var(--muted)' }}
                             content={<ChartTooltip titleKey="name" />}
                         />
-                        <Bar dataKey="total" radius={[0, 3, 3, 0]} maxBarSize={28}>
+                        <Bar
+                            dataKey="total"
+                            radius={[0, 3, 3, 0]}
+                            maxBarSize={28}
+                        >
                             {data.map((entry, index) => (
                                 <Cell
                                     key={entry.code}

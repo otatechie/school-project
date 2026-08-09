@@ -7,7 +7,7 @@ import ledgers from '@/routes/ledgers';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'General Ledger', href: ledgers.index().url },
+    { title: 'General ledger', href: ledgers.index().url },
 ];
 
 type Props = {
@@ -31,11 +31,11 @@ export default function LedgerIndex({ summary }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="General Ledger" />
+            <Head title="General ledger" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
                 <header>
                     <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                        General Ledger
+                        General ledger
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
                         Entries post automatically when a payment voucher is
@@ -105,7 +105,7 @@ export default function LedgerIndex({ summary }: Props) {
                                     aria-hidden="true"
                                 />
                                 <h2 className="text-base font-semibold text-black dark:text-white">
-                                    Chart of Accounts
+                                    Chart of accounts
                                 </h2>
                             </div>
                             <p className="text-sm text-muted-foreground">

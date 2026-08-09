@@ -2,6 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Department;
+use App\Models\Memo;
+use App\Models\PaymentVoucher;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -40,6 +44,17 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                // Derived from the same policies the controllers authorize
+                // against, so a button can never offer an action the server
+                // will refuse.
+                'can' => $request->user() ? [
+                    'createVoucher' => $request->user()->can('create', PaymentVoucher::class),
+                    'createMemo' => $request->user()->can('create', Memo::class),
+                    'reviewVouchers' => $request->user()->hasRole(User::ROLE_ADMIN, User::ROLE_APPROVER),
+                    'manageDepartments' => $request->user()->can('create', Department::class),
+                    'manageStaff' => $request->user()->can('viewAny', User::class),
+                    'viewAuditLog' => $request->user()->isAdmin(),
+                ] : null,
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),

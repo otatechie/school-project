@@ -16,8 +16,8 @@ import ledgers from '@/routes/ledgers';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'General Ledger', href: ledgers.index().url },
-    { title: 'Chart of Accounts', href: ledgers.chartOfAccounts().url },
+    { title: 'General ledger', href: ledgers.index().url },
+    { title: 'Chart of accounts', href: ledgers.chartOfAccounts().url },
 ];
 
 type Account = {
@@ -72,17 +72,17 @@ export default function ChartOfAccounts({ accounts, types, filters }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Chart of Accounts" />
+            <Head title="Chart of accounts" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
                 <header className="space-y-1">
                     <Button variant="ghost" size="sm" asChild className="-ml-2">
                         <Link href={ledgers.index().url} className="gap-2">
                             <ArrowLeft className="h-4 w-4" />
-                            <span>Back to Ledger</span>
+                            <span>Back to ledger</span>
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
-                        Chart of Accounts
+                        Chart of accounts
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         Account codes with posted balances, in GHS.
@@ -176,7 +176,9 @@ export default function ChartOfAccounts({ accounts, types, filters }: Props) {
                                             <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
                                                 Account Name
                                             </th>
-                                            <th className="hidden sm:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">Type</th>
+                                            <th className="hidden px-4 py-3 text-left text-sm font-semibold text-black sm:table-cell dark:text-white">
+                                                Type
+                                            </th>
                                             <th className="px-4 py-3 text-right text-sm font-semibold text-black dark:text-white">
                                                 Debits
                                             </th>
@@ -199,7 +201,7 @@ export default function ChartOfAccounts({ accounts, types, filters }: Props) {
                                                 <td className="px-4 py-3 text-sm text-black dark:text-white">
                                                     {account.name}
                                                 </td>
-                                                <td className="hidden sm:table-cell px-4 py-3 text-sm text-muted-foreground capitalize">
+                                                <td className="hidden px-4 py-3 text-sm text-muted-foreground capitalize sm:table-cell">
                                                     {account.type}
                                                 </td>
                                                 <td className="px-4 py-3 text-right text-sm text-black tabular-nums dark:text-white">

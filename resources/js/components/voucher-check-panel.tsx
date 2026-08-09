@@ -28,7 +28,10 @@ export default function VoucherCheckPanel({
             aria-live="polite"
         >
             <p className="flex items-center gap-2 text-sm font-semibold text-amber-900 dark:text-amber-200">
-                <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <AlertTriangle
+                    className="h-4 w-4 shrink-0"
+                    aria-hidden="true"
+                />
                 {findings.length} thing{findings.length === 1 ? '' : 's'} worth
                 checking
             </p>

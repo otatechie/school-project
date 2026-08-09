@@ -11,7 +11,7 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Payment Vouchers',
+        title: 'Payment vouchers',
         href: paymentVouchers.index().url,
     },
     {
