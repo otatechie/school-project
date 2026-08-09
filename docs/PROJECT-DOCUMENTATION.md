@@ -33,8 +33,8 @@ Sign-in credentials appear on the sign-in page while demonstration mode is on.
 
 ## Access for the examiner
 
-**Live application:** https://govpay.win
-**Source code:** https://github.com/otatechie/school-project
+- **Live application:** <https://govpay.win>
+- **Source code:** <https://github.com/otatechie/school-project>
 
 There is no separate administrative URL. Administration is part of the
 application and appears for accounts holding the Administrator role.
