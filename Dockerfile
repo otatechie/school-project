@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 #
 # Three stages: resolve PHP dependencies, build the frontend, then assemble a
-# runtime image serving nginx + php-fpm with a queue worker under supervisor.
+# runtime image serving nginx + php-fpm under supervisor.
 #
 # The vendor stage comes first because the asset build needs it: the Wayfinder
 # Vite plugin shells out to `php artisan wayfinder:generate` to write the typed
@@ -104,29 +104,43 @@ RUN test -f public/build/manifest.json \
 # ---------------------------------------------------------------------------
 FROM php:8.4-fpm-alpine AS runtime
 
-# nginx serves static files and proxies PHP to php-fpm; supervisor keeps both
-# alive in the single container Dokploy expects. bash is here because Dokploy's
-# web terminal execs bash unconditionally, and Alpine ships only BusyBox sh.
+# Two groups, deliberately. The first are runtime libraries the compiled
+# extensions link against and must stay; the second are headers needed only to
+# compile them, installed as a virtual package and removed afterwards.
+#
+# Removing a `-dev` package also removes the runtime library it depends on,
+# which is how gd.so ended up unable to find libpng16.so.16 on every request.
+#
+# gd is deliberately absent: nothing in the app decodes images. Document
+# uploads are validated with `mimes:`, which uses fileinfo.
+#
+# bash is not used by the app; Dokploy's web terminal execs it unconditionally
+# and Alpine ships only BusyBox sh.
 RUN apk add --no-cache \
         bash \
         nginx \
         supervisor \
+        icu-libs \
+        libzip \
+        oniguruma \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
         icu-dev \
         libzip-dev \
         oniguruma-dev \
-        libpng-dev \
-        freetype-dev \
-        libjpeg-turbo-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         pdo_mysql \
         bcmath \
         intl \
         zip \
-        gd \
         opcache \
-    && apk del --no-network libpng-dev freetype-dev libjpeg-turbo-dev \
+    && apk del --no-network .build-deps \
     && rm -rf /var/cache/apk/*
+
+# Every compiled extension must load cleanly. Without this the image builds
+# fine and then warns on every single request instead.
+RUN php -r 'foreach (["pdo_mysql","bcmath","intl","zip","fileinfo","mbstring"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR, "FATAL: $e did not load\\n"); exit(1); } } echo "all extensions load\\n";' \
+    && php -v
 
 WORKDIR /var/www/html
 
