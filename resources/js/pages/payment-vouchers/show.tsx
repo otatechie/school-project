@@ -1,8 +1,10 @@
-import { Head, Link } from '@inertiajs/react';
-import { AlertCircle, ArrowLeft, Edit } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { AlertCircle, ArrowLeft, Check, Edit, Send } from 'lucide-react';
+import { useState } from 'react';
 import VoucherAttachments, {
     type Attachment,
 } from '@/components/voucher-attachments';
+import ConfirmDialog from '@/components/confirm-dialog';
 import FlashMessages from '@/components/flash-messages';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -91,6 +93,14 @@ const money = (amount: string | number): string =>
         { minimumFractionDigits: 2 },
     );
 
+/**
+ * An optional field nobody filled in. A dash leaves the reader guessing whether
+ * the value is missing or simply does not exist; this says which.
+ */
+function NotGiven() {
+    return <span className="text-muted-foreground">Not given</span>;
+}
+
 function Detail({
     label,
     children,
@@ -118,6 +128,59 @@ export default function Show({ voucher, attachments, canUpdate }: Props) {
         canUpdate && ['draft', 'rejected'].includes(voucher.status);
 
     const entries = voucher.ledger_entries ?? [];
+
+    const [confirmingSubmit, setConfirmingSubmit] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    const submitVoucher = () => {
+        setSubmitting(true);
+        router.post(
+            paymentVouchers.submit({ voucher: voucher.id }).url,
+            {},
+            {
+                onFinish: () => {
+                    setSubmitting(false);
+                    setConfirmingSubmit(false);
+                },
+            },
+        );
+    };
+
+    // Only steps that have actually happened. A draft has no approver, and
+    // listing empty rows for approval and payment tells the reader nothing
+    // except that the future has not occurred yet.
+    const history = [
+        voucher.creator && {
+            label: 'Prepared',
+            who: voucher.creator.name,
+            when: voucher.submitted_at_label
+                ? `Submitted ${voucher.submitted_at_label}`
+                : null,
+        },
+        voucher.approver && {
+            label: 'Approved',
+            who: voucher.approver.name,
+            when: voucher.approved_at_label,
+        },
+        voucher.rejector && {
+            label: 'Returned',
+            who: voucher.rejector.name,
+            when: voucher.rejected_at_label,
+        },
+        voucher.payer && {
+            label: 'Paid',
+            who: voucher.payer.name,
+            when: voucher.paid_at_label,
+        },
+    ].filter((step): step is NonNullable<typeof step> => Boolean(step));
+
+    const nextStep = {
+        draft: 'Waiting to be submitted for approval.',
+        pending: 'Waiting for an approver.',
+        approved: 'Approved. Waiting to be paid.',
+        rejected: 'Returned for correction. Edit it and submit it again.',
+        paid: null,
+    }[voucher.status];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -153,6 +216,16 @@ export default function Show({ voucher, attachments, canUpdate }: Props) {
                                 <span>Back to vouchers</span>
                             </Link>
                         </Button>
+                        {editable && voucher.status === 'draft' && (
+                            <Button
+                                variant="outline"
+                                className="gap-2"
+                                onClick={() => setConfirmingSubmit(true)}
+                            >
+                                <Send className="h-4 w-4" />
+                                <span>Submit</span>
+                            </Button>
+                        )}
                         {editable && (
                             <Button asChild>
                                 <Link
@@ -199,18 +272,22 @@ export default function Show({ voucher, attachments, canUpdate }: Props) {
                         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <Detail label="Payee">{voucher.payee_name}</Detail>
                             <Detail label="Bank">
-                                {voucher.payee_bank ?? '—'}
+                                {voucher.payee_bank ?? <NotGiven />}
                             </Detail>
                             <Detail label="Account number">
-                                <span className="font-mono">
-                                    {voucher.payee_account_number ?? '—'}
-                                </span>
+                                {voucher.payee_account_number ? (
+                                    <span className="font-mono">
+                                        {voucher.payee_account_number}
+                                    </span>
+                                ) : (
+                                    <NotGiven />
+                                )}
                             </Detail>
                             <Detail label="Phone">
-                                {voucher.payee_phone ?? '—'}
+                                {voucher.payee_phone ?? <NotGiven />}
                             </Detail>
                             <Detail label="Department">
-                                {voucher.department?.name ?? '—'}
+                                {voucher.department?.name ?? <NotGiven />}
                             </Detail>
                             <Detail label="Payment method">
                                 {PAYMENT_METHODS[voucher.payment_method] ??
@@ -257,36 +334,31 @@ export default function Show({ voucher, attachments, canUpdate }: Props) {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Trail</CardTitle>
+                        <CardTitle>History</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            <Detail label="Prepared by">
-                                {voucher.creator?.name ?? '—'}
-                                <span className="block text-muted-foreground">
-                                    {voucher.submitted_at_label ??
-                                        'Not yet submitted'}
-                                </span>
-                            </Detail>
-                            <Detail label="Approved by">
-                                {voucher.approver?.name ?? '—'}
-                                <span className="block text-muted-foreground">
-                                    {voucher.approved_at_label ?? '—'}
-                                </span>
-                            </Detail>
-                            <Detail label="Returned by">
-                                {voucher.rejector?.name ?? '—'}
-                                <span className="block text-muted-foreground">
-                                    {voucher.rejected_at_label ?? '—'}
-                                </span>
-                            </Detail>
-                            <Detail label="Paid by">
-                                {voucher.payer?.name ?? '—'}
-                                <span className="block text-muted-foreground">
-                                    {voucher.paid_at_label ?? '—'}
-                                </span>
-                            </Detail>
-                        </dl>
+                        <ol className="space-y-4">
+                            {history.map((step) => (
+                                <li key={step.label} className="flex gap-3">
+                                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                    <div className="space-y-0.5">
+                                        <p className="text-sm text-black dark:text-white">
+                                            {step.label} by {step.who}
+                                        </p>
+                                        {step.when && (
+                                            <p className="text-sm text-muted-foreground">
+                                                {step.when}
+                                            </p>
+                                        )}
+                                    </div>
+                                </li>
+                            ))}
+                        </ol>
+                        {nextStep && (
+                            <p className="mt-4 border-t border-border pt-4 text-sm text-muted-foreground">
+                                {nextStep}
+                            </p>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -374,6 +446,16 @@ export default function Show({ voucher, attachments, canUpdate }: Props) {
                     </Card>
                 )}
             </div>
+
+            <ConfirmDialog
+                open={confirmingSubmit}
+                onOpenChange={setConfirmingSubmit}
+                title="Submit for approval?"
+                description="Once submitted you cannot edit this voucher. An approver must return it before you can change anything."
+                confirmLabel="Submit"
+                processing={submitting}
+                onConfirm={submitVoucher}
+            />
         </AppLayout>
     );
 }

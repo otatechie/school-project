@@ -29,3 +29,8 @@ yarn-error.log
 
 # Generated documentation output (rebuild with docs/build-pdf.php)
 /docs/html
+
+# Examination submissions. These carry students' names and ID numbers, and the
+# repository is public. Regenerate with: php docs/build-submissions.php
+/docs/submissions/
+/docs/contributions/

@@ -33,16 +33,23 @@ and are not tracked.
 php docs/build-submissions.php
 ```
 
-Writes, for each group member listed in [contributions.php](contributions.php):
+Writes, for the student named in the script's `BUILD_FOR`:
 
 - `submissions/Group07_<ID>_Capstone_Documentation.pdf`
 - `submissions/Group07_<ID>_User_Manual.pdf`
 - `contributions/Group07_<ID>_Contribution.pdf` (their section 17 alone, for review)
 
-The technical chapters are shared; section 17 differs per student. The
-division of labour in `contributions.php` is a proposal read from the shape of
-the codebase. Each member must confirm or correct their own entry before
-submitting; edit the file and re-run the script.
+Each student submits individually, so only one student's files are built. To
+build someone else, add their ID to `BUILD_FOR`; they must be listed in
+[contributions.php](contributions.php).
+
+The technical chapters describe one system and are the same in every copy;
+section 17 differs. The division of labour in `contributions.php` is a proposal
+read from the shape of the codebase, not a record of who committed what. Each
+member must confirm or correct their own entry before submitting.
+
+Both output folders are gitignored: they carry names and student ID numbers,
+and this repository is public.
 
 ## Live system
 

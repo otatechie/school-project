@@ -22,7 +22,23 @@ use League\CommonMark\MarkdownConverter;
 
 const GROUP = 'Group07';
 
+/*
+ * Whose documents to build. Each student submits individually, so only the
+ * submitting student's files are generated here. Add an ID to build another,
+ * or empty the array to build every entry in contributions.php.
+ */
+const BUILD_FOR = ['22424559'];
+
 $contributions = require __DIR__.'/contributions.php';
+
+if (BUILD_FOR !== []) {
+    $contributions = array_intersect_key($contributions, array_flip(BUILD_FOR));
+
+    if ($contributions === []) {
+        fwrite(STDERR, "No student in BUILD_FOR matches contributions.php\n");
+        exit(1);
+    }
+}
 
 /**
  * Builds section 17 for one student: their area, the files it covers, and the
