@@ -7,12 +7,7 @@ export type User = {
     staff_id?: string | null;
     department_id?: string | null;
     position?: string | null;
-    last_login_at?: string | null;
-    last_login_ip?: string | null;
-    approval_level?: number | null;
-    approval_limit?: string | null;
     is_active?: boolean;
-    password_changed_at?: string | null;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
     created_at: string;

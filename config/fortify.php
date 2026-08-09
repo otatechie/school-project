@@ -144,7 +144,9 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Public self-registration is deliberately absent. Access to public
+        // expenditure records is granted by an administrator under Staff,
+        // never claimed by whoever finds the sign-in page.
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

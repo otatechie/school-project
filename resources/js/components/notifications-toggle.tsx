@@ -1,126 +1,41 @@
-import { Link } from '@inertiajs/react';
-import { index as notificationsIndex } from '@/routes/notifications';
+import { Link, router, usePage } from '@inertiajs/react';
 import {
+    Banknote,
     Bell,
     CheckCircle2,
     Clock,
-    AlertCircle,
-    XCircle,
-    FileText,
     Mail,
+    XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuLabel,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import notifications from '@/routes/notifications';
+import type { SharedData } from '@/types';
 
-type Notification = {
-    id: string;
-    type: 'approval' | 'pending' | 'alert' | 'rejected' | 'memo';
-    title: string;
-    message: string;
-    time: string;
-    read: boolean;
-    href?: string;
+/** One icon per event type, matching the icons used on the pages themselves. */
+const ICONS: Record<string, typeof Bell> = {
+    'voucher.pending': Clock,
+    'voucher.approved': CheckCircle2,
+    'voucher.rejected': XCircle,
+    'voucher.paid': Banknote,
+    'memo.created': Mail,
 };
 
-const mockNotifications: Notification[] = [
-    {
-        id: '1',
-        type: 'approval',
-        title: 'Voucher Approved',
-        message: 'Payment voucher PV-2024-001 has been approved',
-        time: '2 minutes ago',
-        read: false,
-        href: '/payment-vouchers',
-    },
-    {
-        id: '2',
-        type: 'pending',
-        title: 'Approval Required',
-        message: 'Payment voucher PV-2024-002 requires your approval',
-        time: '15 minutes ago',
-        read: false,
-        href: '/payment-vouchers/pending',
-    },
-    {
-        id: '3',
-        type: 'alert',
-        title: 'Budget Limit Warning',
-        message: 'Procurement department has reached 85% of monthly budget',
-        time: '1 hour ago',
-        read: false,
-        href: '/dashboard',
-    },
-    {
-        id: '4',
-        type: 'approval',
-        title: 'Voucher Approved',
-        message: 'Payment voucher PV-2024-003 has been approved',
-        time: '2 hours ago',
-        read: true,
-        href: '/payment-vouchers',
-    },
-    {
-        id: '5',
-        type: 'rejected',
-        title: 'Voucher Rejected',
-        message: 'Payment voucher PV-2024-004 was rejected. Review required.',
-        time: '3 hours ago',
-        read: false,
-        href: '/payment-vouchers/rejected',
-    },
-    {
-        id: '6',
-        type: 'memo',
-        title: 'Memo Finalized',
-        message: 'Memo MEMO-2024-002 has been finalized and is ready for printing.',
-        time: '45 minutes ago',
-        read: false,
-        href: '/memos',
-    },
-    {
-        id: '7',
-        type: 'memo',
-        title: 'New Memo Draft',
-        message: 'Draft memo MEMO-2024-003 is awaiting your review.',
-        time: '5 hours ago',
-        read: true,
-        href: '/memos',
-    },
-];
+/** Recency for anything recent; the standard date once it is older. */
+const relativeTime = (iso: string, fallback: string): string => {
+    const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
 
-const getNotificationIcon = (type: Notification['type']) => {
-    switch (type) {
-        case 'approval':
-            return (
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-            );
-        case 'pending':
-            return (
-                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            );
-        case 'alert':
-            return (
-                <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            );
-        case 'rejected':
-            return (
-                <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-            );
-        case 'memo':
-            return (
-                <Mail className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-            );
-        default:
-            return <FileText className="h-4 w-4 text-muted-foreground" />;
-    }
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+
+    return fallback;
 };
 
 export default function NotificationsToggle({
@@ -128,159 +43,147 @@ export default function NotificationsToggle({
 }: {
     className?: string;
 }) {
-    const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-    const unreadCount = Array.isArray(notifications) ? notifications.filter((n) => !n.read).length : 0;
+    const { notifications: data } = usePage<SharedData>().props;
 
-    const markAsRead = (id: string) => {
-        if (!Array.isArray(notifications)) return;
-        setNotifications(
-            notifications.map((n) =>
-                n.id === id ? { ...n, read: true } : n
-            )
-        );
-    };
+    const items = data?.items ?? [];
+    const unread = data?.unread ?? 0;
 
-    const markAllAsRead = () => {
-        if (!Array.isArray(notifications)) return;
-        setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    const open = (id: string, link: string | null, isRead: boolean) => {
+        if (!isRead) {
+            router.post(
+                notifications.read(id).url,
+                {},
+                { preserveScroll: true, preserveState: true },
+            );
+        }
+
+        if (link) router.get(link);
     };
 
     return (
-        <div className={cn('', className)}>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="relative h-9 w-9 cursor-pointer"
-                    >
-                        <Bell className="h-4 w-4" />
-                        {unreadCount > 0 && (
-                            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-sm font-bold text-white">
-                                {unreadCount > 9 ? '9+' : unreadCount}
-                            </span>
-                        )}
-                        <span className="sr-only">Notifications</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-96 p-0">
-                    <div className="flex items-center justify-between border-b border-border px-3 py-2">
-                        <DropdownMenuLabel className="p-0 text-sm font-semibold text-black dark:text-white">
-                            Notifications
-                        </DropdownMenuLabel>
-                        {unreadCount > 0 && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={markAllAsRead}
-                                className="h-6 text-sm text-muted-foreground hover:text-foreground"
-                            >
-                                Mark all as read
-                            </Button>
-                        )}
-                    </div>
-                    <div className="max-h-[400px] overflow-y-auto">
-                        {!Array.isArray(notifications) || notifications.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-8 text-center">
-                                <Bell className="mb-3 h-10 w-10 text-muted-foreground" />
-                                <p className="text-sm text-muted-foreground">
-                                    No notifications
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="divide-y divide-border">
-                                {notifications.map((notification) => (
-                                    <div
-                                        key={notification.id}
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn('relative', className)}
+                    aria-label={
+                        unread > 0
+                            ? `Notifications, ${unread} unread`
+                            : 'Notifications'
+                    }
+                >
+                    <Bell className="h-5 w-5" />
+                    {unread > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-white tabular-nums">
+                            {unread > 9 ? '9+' : unread}
+                        </span>
+                    )}
+                </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-80 p-0">
+                <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
+                    <p className="text-sm font-semibold text-black dark:text-white">
+                        Notifications
+                    </p>
+                    {unread > 0 && (
+                        <button
+                            type="button"
+                            className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+                            onClick={() =>
+                                router.post(
+                                    notifications.readAll().url,
+                                    {},
+                                    { preserveScroll: true },
+                                )
+                            }
+                        >
+                            Mark all as read
+                        </button>
+                    )}
+                </div>
+
+                {items.length === 0 ? (
+                    <p className="px-3 py-8 text-center text-sm text-muted-foreground">
+                        Nothing new. Updates on your vouchers appear here.
+                    </p>
+                ) : (
+                    <ul className="max-h-80 overflow-y-auto">
+                        {items.map((item) => {
+                            const Icon = ICONS[item.type] ?? Bell;
+                            const isRead = Boolean(item.read_at);
+
+                            return (
+                                <li key={item.id}>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            open(item.id, item.link, isRead)
+                                        }
                                         className={cn(
-                                            'group relative px-3 py-2 transition-colors hover:bg-muted/50',
-                                            !notification.read &&
-                                                'bg-muted/30'
+                                            'flex w-full items-start gap-2.5 border-b border-border px-3 py-2.5 text-left transition-colors last:border-b-0 hover:bg-muted/60',
+                                            !isRead && 'bg-muted/30',
                                         )}
                                     >
-                                        {notification.href ? (
-                                            <Link
-                                                href={notification.href}
-                                                onClick={() =>
-                                                    markAsRead(notification.id)
-                                                }
-                                                className="flex items-start gap-2.5"
+                                        <Icon
+                                            className={cn(
+                                                'mt-0.5 h-4 w-4 shrink-0',
+                                                isRead
+                                                    ? 'text-muted-foreground'
+                                                    : 'text-foreground',
+                                            )}
+                                            aria-hidden="true"
+                                        />
+                                        <span className="min-w-0 flex-1">
+                                            <span
+                                                className={cn(
+                                                    'block text-sm',
+                                                    isRead
+                                                        ? 'text-muted-foreground'
+                                                        : 'font-medium text-black dark:text-white',
+                                                )}
                                             >
-                                                <div className="mt-0.5 shrink-0">
-                                                    {getNotificationIcon(
-                                                        notification.type
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0 space-y-0.5">
-                                                    <div className="flex items-start justify-between gap-2">
-                                                        <p className="text-sm font-medium text-black dark:text-white line-clamp-1">
-                                                            {
-                                                                notification.title
-                                                            }
-                                                        </p>
-                                                        {!notification.read && (
-                                                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                                                        )}
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground line-clamp-2">
-                                                        {notification.message}
-                                                    </p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {notification.time}
-                                                    </p>
-                                                </div>
-                                            </Link>
-                                        ) : (
-                                            <div className="flex items-start gap-2.5">
-                                                <div className="mt-0.5 shrink-0">
-                                                    {getNotificationIcon(
-                                                        notification.type
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0 space-y-0.5">
-                                                    <div className="flex items-start justify-between gap-2">
-                                                        <p className="text-sm font-medium text-black dark:text-white line-clamp-1">
-                                                            {
-                                                                notification.title
-                                                            }
-                                                        </p>
-                                                        {!notification.read && (
-                                                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                                                        )}
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground line-clamp-2">
-                                                        {notification.message}
-                                                    </p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {notification.time}
-                                                    </p>
-                                                </div>
-                                            </div>
+                                                {item.title}
+                                            </span>
+                                            {item.body && (
+                                                <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                                                    {item.body}
+                                                </span>
+                                            )}
+                                            <span className="mt-0.5 block text-xs text-muted-foreground">
+                                                {relativeTime(
+                                                    item.created_at,
+                                                    item.created_at_label,
+                                                )}
+                                            </span>
+                                        </span>
+                                        {!isRead && (
+                                            <span
+                                                className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary"
+                                                aria-label="Unread"
+                                            />
                                         )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    {Array.isArray(notifications) && notifications.length > 0 && (
-                        <>
-                            <Separator />
-                            <div className="p-2">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-full text-sm"
-                                    asChild
-                                >
-                                    <Link href={notificationsIndex().url}>
-                                        View all notifications
-                                    </Link>
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
+                                    </button>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+
+                <div className="border-t border-border p-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-center"
+                        asChild
+                    >
+                        <Link href={notifications.index().url}>
+                            View all notifications
+                        </Link>
+                    </Button>
+                </div>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }

@@ -44,7 +44,7 @@ export default function Profile({
 }) {
     const { auth } = usePage<SharedData>().props;
     const [departmentId, setDepartmentId] = useState<string>(
-        auth.user.department_id ?? ''
+        auth.user.department_id ?? '',
     );
 
     return (
@@ -91,7 +91,9 @@ export default function Profile({
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="email">Email address</Label>
+                                        <Label htmlFor="email">
+                                            Email address
+                                        </Label>
 
                                         <Input
                                             id="email"
@@ -130,13 +132,17 @@ export default function Profile({
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="staff_id">Staff ID</Label>
+                                        <Label htmlFor="staff_id">
+                                            Staff ID
+                                        </Label>
 
                                         <Input
                                             id="staff_id"
                                             type="text"
                                             className="mt-1 block w-full"
-                                            defaultValue={auth.user.staff_id ?? ''}
+                                            defaultValue={
+                                                auth.user.staff_id ?? ''
+                                            }
                                             name="staff_id"
                                             placeholder="Employee or staff number"
                                         />
@@ -197,13 +203,17 @@ export default function Profile({
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="position">Position</Label>
+                                        <Label htmlFor="position">
+                                            Position
+                                        </Label>
 
                                         <Input
                                             id="position"
                                             type="text"
                                             className="mt-1 block w-full"
-                                            defaultValue={auth.user.position ?? ''}
+                                            defaultValue={
+                                                auth.user.position ?? ''
+                                            }
                                             name="position"
                                             placeholder="Job title or role"
                                         />

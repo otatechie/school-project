@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable
 {
@@ -29,12 +27,9 @@ class User extends Authenticatable
         'staff_id',
         'department_id',
         'position',
-        'last_login_at',
-        'last_login_ip',
-        'approval_level',
+        'role',
         'approval_limit',
         'is_active',
-        'password_changed_at',
     ];
 
     /**
@@ -60,10 +55,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
-            'last_login_at' => 'datetime',
-            'password_changed_at' => 'datetime',
-            'approval_limit' => 'decimal:2',
             'is_active' => 'boolean',
+            'approval_limit' => 'decimal:2',
             'deleted_at' => 'datetime',
         ];
     }
@@ -93,18 +86,44 @@ class User extends Authenticatable
         return $this->hasMany(PaymentVoucher::class, 'paid_by');
     }
 
-    public function uploadedDocuments()
-    {
-        return $this->hasMany(VoucherDocument::class, 'uploaded_by');
-    }
-
-    public function voucherApprovals()
-    {
-        return $this->hasMany(VoucherApproval::class, 'approver_id');
-    }
-
     public function memos()
     {
         return $this->hasMany(Memo::class, 'created_by');
+    }
+
+    public const ROLE_ADMIN = 'admin';
+
+    public const ROLE_APPROVER = 'approver';
+
+    public const ROLE_FINANCE_OFFICER = 'finance_officer';
+
+    public const ROLE_VIEWER = 'viewer';
+
+    /**
+     * @return array<string, string>
+     */
+    public static function roles(): array
+    {
+        return [
+            self::ROLE_ADMIN => 'Administrator',
+            self::ROLE_APPROVER => 'Approver',
+            self::ROLE_FINANCE_OFFICER => 'Finance Officer',
+            self::ROLE_VIEWER => 'Viewer',
+        ];
+    }
+
+    public function hasRole(string ...$roles): bool
+    {
+        return in_array($this->role, $roles, true);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function notifications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AppNotification::class);
     }
 }

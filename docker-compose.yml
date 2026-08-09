@@ -1,0 +1,80 @@
+# Deployment stack for Dokploy.
+#
+# In Dokploy, create a Compose service pointing at this file and set the
+# environment variables listed in .env.docker.example under the service's
+# Environment tab. Dokploy supplies the domain and TLS termination, so the
+# app only needs to expose port 80 internally.
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        depends_on:
+            db:
+                condition: service_healthy
+        environment:
+            APP_NAME: ${APP_NAME:-GovPay Desk}
+            APP_ENV: production
+            APP_KEY: ${APP_KEY}
+            APP_DEBUG: "false"
+            APP_URL: ${APP_URL}
+
+            DB_CONNECTION: mysql
+            DB_HOST: db
+            DB_PORT: "3306"
+            DB_DATABASE: ${DB_DATABASE:-govpay}
+            DB_USERNAME: ${DB_USERNAME:-govpay}
+            DB_PASSWORD: ${DB_PASSWORD}
+
+            SESSION_DRIVER: database
+            CACHE_STORE: database
+            QUEUE_CONNECTION: database
+
+            LOG_CHANNEL: stderr
+            LOG_LEVEL: ${LOG_LEVEL:-warning}
+
+            # Emerging technology: Claude API. The app runs without this set,
+            # with the AI features reporting themselves as unavailable.
+            ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+            ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-5}
+
+            SEED_ON_FIRST_BOOT: ${SEED_ON_FIRST_BOOT:-true}
+
+            # Publishes working credentials on the sign-in page. Assessment
+            # deployments only — never on a system holding real records.
+            DEMO_MODE: ${DEMO_MODE:-false}
+            DEMO_PASSWORD: ${DEMO_PASSWORD:-password}
+        volumes:
+            - app-storage:/var/www/html/storage/app
+        expose:
+            - "80"
+        healthcheck:
+            test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/up') ? 0 : 1);"]
+            interval: 30s
+            timeout: 5s
+            retries: 5
+            start_period: 60s
+
+    db:
+        image: mysql:8.4
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE:-govpay}
+            MYSQL_USER: ${DB_USERNAME:-govpay}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        volumes:
+            - db-data:/var/lib/mysql
+        healthcheck:
+            test:
+                ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+            start_period: 30s
+
+volumes:
+    app-storage:
+    db-data:

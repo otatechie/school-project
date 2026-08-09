@@ -41,6 +41,22 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
+            // The bell in the header needs the signed-in user's own unread
+            // notifications on every page, so they are shared rather than
+            // fetched per page.
+            'notifications' => fn () => $request->user()
+                ? [
+                    'unread' => $request->user()->notifications()->whereNull('read_at')->count(),
+                    'items' => $request->user()->notifications()
+                        ->latest()
+                        ->limit(6)
+                        ->get(['id', 'type', 'title', 'body', 'link', 'read_at', 'created_at']),
+                ]
+                : ['unread' => 0, 'items' => []],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

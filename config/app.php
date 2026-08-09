@@ -30,6 +30,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Demonstration Mode
+    |--------------------------------------------------------------------------
+    |
+    | Prefills the sign-in form with the demonstration superadmin and lists the
+    | other sample accounts, so an assessor can reach the system without being
+    | handed credentials separately. Defaults on locally and off everywhere
+    | else. Never enable this on a deployment holding real records.
+    |
+    */
+
+    'demo_mode' => (bool) env('DEMO_MODE', env('APP_ENV') === 'local'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

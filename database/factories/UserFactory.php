@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -32,6 +33,11 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'staff_id' => 'STF-'.fake()->unique()->numberBetween(1000, 9999),
+            'department_id' => Department::factory(),
+            'position' => fake()->randomElement(['Accountant', 'Finance Officer', 'Director', 'Procurement Officer', 'Administrator']),
+            'phone' => fake()->numerify('+233 ### ### ###'),
+            'is_active' => true,
         ];
     }
 
@@ -54,6 +60,13 @@ class UserFactory extends Factory
             'two_factor_secret' => encrypt('secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
+        ]);
+    }
+
+    public function approver(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'position' => 'Director',
         ]);
     }
 }

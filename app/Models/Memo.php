@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\Dates;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,16 +27,22 @@ class Memo extends Model
         'voucher_id',
         'created_by',
         'status',
-        'printed_at',
     ];
 
     protected function casts(): array
     {
         return [
             'memo_date' => 'date',
-            'printed_at' => 'datetime',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    /** @var list<string> */
+    protected $appends = ['memo_date_label'];
+
+    protected function memoDateLabel(): Attribute
+    {
+        return Attribute::get(fn () => Dates::short($this->memo_date));
     }
 
     public function department(): BelongsTo

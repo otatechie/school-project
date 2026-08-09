@@ -1,170 +1,188 @@
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, BarChart3, TrendingDown, TrendingUp } from 'lucide-react';
-import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
+import { Head, Link, router } from '@inertiajs/react';
+import { Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription } from '@/components/ui/card';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
+import financialReports from '@/routes/financial-reports';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Financial Reports', href: '/financial-reports/monthly' },
-    { title: 'Monthly Report', href: '/financial-reports/monthly' },
+    { title: 'Monthly Report', href: financialReports.monthly().url },
 ];
 
-const monthlyData = [
-    { month: 'Jul', spent: 245000, budget: 280000 },
-    { month: 'Aug', spent: 268000, budget: 280000 },
-    { month: 'Sep', spent: 272000, budget: 280000 },
-    { month: 'Oct', spent: 258000, budget: 280000 },
-    { month: 'Nov', spent: 265000, budget: 280000 },
-    { month: 'Dec', spent: 278000, budget: 280000 },
-];
-
-const summary = {
-    totalSpent: 1586000,
-    totalBudget: 1680000,
-    variance: 94000,
-    variancePercent: 5.6,
+type Month = {
+    month: string;
+    label: string;
+    total: number;
+    vouchers: number;
 };
 
-export default function MonthlyReport() {
-    const underBudget = summary.variance >= 0;
+type Props = {
+    year: number;
+    years: number[];
+    months: Month[];
+    total: number;
+};
+
+const money = (v: number): string =>
+    v.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+
+export default function MonthlyReport({ year, years, months, total }: Props) {
+    const peak = Math.max(...months.map((m) => m.total), 1);
+    const options = years.length > 0 ? years : [year];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Monthly Financial Report" />
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
-                <header className="space-y-1">
-                    <Button variant="ghost" size="sm" asChild className="-ml-2">
-                        <Link href={dashboard().url} className="gap-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            <span>Back to Dashboard</span>
-                        </Link>
-                    </Button>
-                    <h1 className="text-3xl font-semibold text-black dark:text-white">
-                        Monthly Financial Report
-                    </h1>
-                    <p className="text-base text-muted-foreground">
-                        Spending vs budget by month (GHS)
-                    </p>
+            <Head title="Monthly Report" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
+                <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
+                            Monthly Expenditure
+                        </h1>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Vouchers paid in {year}, in GHS.
+                        </p>
+                    </div>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <Select
+                            value={String(year)}
+                            onValueChange={(v) =>
+                                router.get(
+                                    financialReports.monthly().url,
+                                    { year: v },
+                                    { preserveState: true },
+                                )
+                            }
+                        >
+                            <SelectTrigger className="w-full sm:w-[140px]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {options.map((y) => (
+                                    <SelectItem key={y} value={String(y)}>
+                                        {y}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Button variant="outline" asChild>
+                            <Link
+                                href={`${financialReports.print('monthly').url}?year=${year}`}
+                                className="gap-2"
+                            >
+                                <Printer className="h-4 w-4" />
+                                Print report
+                            </Link>
+                        </Button>
+                    </div>
                 </header>
 
-                <section aria-labelledby="summary-heading">
-                    <h2 id="summary-heading" className="sr-only">
-                        Summary
-                    </h2>
-                    <div className="grid gap-4 md:grid-cols-3">
-                        <Card>
-                            <CardContent className="pt-6">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Total spent (6 months)
-                                </p>
-                                <p className="mt-1 text-2xl font-bold text-black dark:text-white">
-                                    GHS {summary.totalSpent.toLocaleString()}
-                                </p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardContent className="pt-6">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Total budget (6 months)
-                                </p>
-                                <p className="mt-1 text-2xl font-bold text-black dark:text-white">
-                                    GHS {summary.totalBudget.toLocaleString()}
-                                </p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardContent className="pt-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Variance
-                                        </p>
-                                        <p
-                                            className={`mt-1 text-2xl font-bold ${underBudget ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
-                                        >
-                                            GHS {Math.abs(summary.variance).toLocaleString()}{' '}
-                                            {underBudget ? 'under' : 'over'}
-                                        </p>
-                                        <p className="mt-0.5 text-sm text-muted-foreground">
-                                            {summary.variancePercent}% of budget
-                                        </p>
-                                    </div>
-                                    {underBudget ? (
-                                        <TrendingDown className="h-8 w-8 text-green-600 dark:text-green-400" />
-                                    ) : (
-                                        <TrendingUp className="h-8 w-8 text-red-600 dark:text-red-400" />
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </section>
+                <Card className="py-5">
+                    <CardContent className="space-y-4">
+                        <CardDescription>
+                            Total paid in {year}:{' '}
+                            <span className="font-semibold text-foreground tabular-nums">
+                                GHS {money(total)}
+                            </span>
+                        </CardDescription>
 
-                <section aria-labelledby="chart-heading">
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle id="chart-heading" className="text-base font-semibold text-black dark:text-white">
-                                Spending by month
-                            </CardTitle>
-                            <CardDescription>
-                                Budget vs actual expenditure (GHS)
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-[320px] min-h-[320px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart
-                                        data={monthlyData}
-                                        margin={{ top: 8, right: 16, left: 0, bottom: 8 }}
-                                    >
-                                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                                        <XAxis
-                                            dataKey="month"
-                                            tick={{ fontSize: 12 }}
-                                            tickLine={false}
-                                            axisLine={{ stroke: 'hsl(var(--border))' }}
-                                        />
-                                        <YAxis
-                                            tick={{ fontSize: 12 }}
-                                            tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-                                            tickLine={false}
-                                            axisLine={false}
-                                        />
-                                        <Tooltip
-                                            cursor={false}
-                                            formatter={(value: number | string | (number | string)[] | undefined) => {
-                                                if (value === undefined) return ['', ''];
-                                                const val = Array.isArray(value) ? value[0] : value;
-                                                return [`GHS ${Number(val).toLocaleString()}`, ''];
-                                            }}
-                                            labelFormatter={(label) => `Month: ${label}`}
-                                            contentStyle={{ fontSize: 12 }}
-                                        />
-                                        <Bar dataKey="budget" fill="#94a3b8" name="Budget" radius={[2, 2, 0, 0]} />
-                                        <Bar dataKey="spent" fill="#0ea5e9" name="Spent" radius={[2, 2, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                        {total === 0 ? (
+                            <div className="py-10 text-center">
+                                <p className="text-sm font-medium text-black dark:text-white">
+                                    No payments recorded in {year}
+                                </p>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    Months appear here once vouchers are marked
+                                    paid.
+                                </p>
                             </div>
-                        </CardContent>
-                    </Card>
-                </section>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b border-border bg-muted/30">
+                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
+                                                Month
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
+                                                Share
+                                            </th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold text-black dark:text-white">
+                                                Vouchers
+                                            </th>
+                                            <th className="px-4 py-3 text-right text-sm font-semibold text-black dark:text-white">
+                                                Amount
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {months.map((m) => (
+                                            <tr
+                                                key={m.month}
+                                                className="border-b border-border"
+                                            >
+                                                <td className="px-4 py-2.5 text-sm whitespace-nowrap text-black dark:text-white">
+                                                    {m.label}
+                                                </td>
+                                                <td className="px-4 py-2.5">
+                                                    <div
+                                                        className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-muted"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div
+                                                            className="h-full rounded-full bg-foreground/70"
+                                                            style={{
+                                                                width: `${Math.round((m.total / peak) * 100)}%`,
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-2.5 text-right text-sm text-muted-foreground tabular-nums">
+                                                    {m.vouchers}
+                                                </td>
+                                                <td className="px-4 py-2.5 text-right text-sm text-black tabular-nums dark:text-white">
+                                                    {m.total > 0
+                                                        ? money(m.total)
+                                                        : '—'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr className="border-t-2 border-border font-semibold">
+                                            <td
+                                                className="px-4 py-3 text-sm text-black dark:text-white"
+                                                colSpan={2}
+                                            >
+                                                Total
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-sm text-black tabular-nums dark:text-white">
+                                                {months.reduce(
+                                                    (s, m) => s + m.vouchers,
+                                                    0,
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-sm text-black tabular-nums dark:text-white">
+                                                {money(total)}
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
         </AppLayout>
     );

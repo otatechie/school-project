@@ -92,7 +92,9 @@ export default function Create() {
                                 <div className="space-y-2">
                                     <Label htmlFor="name">
                                         Department Name{' '}
-                                        <span className="text-destructive">*</span>
+                                        <span className="text-destructive">
+                                            *
+                                        </span>
                                     </Label>
                                     <Input
                                         id="name"
@@ -209,7 +211,9 @@ export default function Create() {
                                     asChild
                                     disabled={isSubmitting}
                                 >
-                                    <Link href={departments.index().url}>Cancel</Link>
+                                    <Link href={departments.index().url}>
+                                        Cancel
+                                    </Link>
                                 </Button>
                                 <Button type="submit" disabled={isSubmitting}>
                                     {isSubmitting ? (

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Support\Dates;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PaymentVoucher extends Model
@@ -39,7 +41,6 @@ class PaymentVoucher extends Model
         'rejected_at',
         'paid_at',
         'rejection_reason',
-        'internal_notes',
     ];
 
     protected function casts(): array
@@ -53,6 +54,29 @@ class PaymentVoucher extends Model
             'paid_at' => 'datetime',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Dates are formatted on the server so every screen and printed record
+     * shows the same thing, rather than following each viewer's locale.
+     *
+     * @var list<string>
+     */
+    protected $appends = ['voucher_date_label', 'submitted_at_label', 'paid_at_label'];
+
+    protected function voucherDateLabel(): Attribute
+    {
+        return Attribute::get(fn () => Dates::short($this->voucher_date));
+    }
+
+    protected function submittedAtLabel(): Attribute
+    {
+        return Attribute::get(fn () => Dates::short($this->submitted_at));
+    }
+
+    protected function paidAtLabel(): Attribute
+    {
+        return Attribute::get(fn () => Dates::short($this->paid_at));
     }
 
     public function department(): BelongsTo
@@ -80,18 +104,13 @@ class PaymentVoucher extends Model
         return $this->belongsTo(User::class, 'paid_by');
     }
 
-    public function documents(): HasMany
-    {
-        return $this->hasMany(VoucherDocument::class, 'voucher_id');
-    }
-
-    public function approvals(): HasMany
-    {
-        return $this->hasMany(VoucherApproval::class, 'voucher_id');
-    }
-
     public function memo(): HasOne
     {
         return $this->hasOne(Memo::class, 'voucher_id');
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 }

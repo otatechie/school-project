@@ -1,181 +1,137 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import departments from '@/routes/departments';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Departments',
-        href: departments.index().url,
-    },
-    {
-        title: 'Edit',
-        href: '#',
-    },
+    { title: 'Departments', href: departments.index().url },
+    { title: 'Edit', href: '#' },
 ];
 
-// Mock department data for UI; replace with props.department when wired to backend.
-const mockDepartment = {
-    id: '1',
-    name: 'Finance',
-    code: 'FIN',
-    is_active: true,
+type Props = {
+    department: {
+        id: string;
+        name: string;
+        code: string;
+        is_active: boolean;
+    };
 };
 
-export default function Edit() {
-    const [formData, setFormData] = useState({
-        name: mockDepartment.name,
-        code: mockDepartment.code,
-        is_active: mockDepartment.is_active,
+export default function DepartmentsEdit({ department }: Props) {
+    const { data, setData, put, processing, errors } = useForm({
+        name: department.name ?? '',
+        code: department.code ?? '',
+        is_active: Boolean(department.is_active),
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const errors: Record<string, string> = {};
-    const successMessage = '';
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        setTimeout(() => setIsSubmitting(false), 800);
-    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Edit Department" />
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
-                <div className="space-y-4">
+            <Head title={`Edit ${department.name}`} />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
+                <div className="space-y-2">
                     <Button variant="ghost" size="sm" asChild className="-ml-2">
                         <Link href={departments.index().url} className="gap-2">
                             <ArrowLeft className="h-4 w-4" />
                             <span>Back to Departments</span>
                         </Link>
                     </Button>
-                    <div>
-                        <h1 className="text-3xl font-semibold text-black dark:text-white">
-                            Edit Department
-                        </h1>
-                        <p className="mt-1 text-base text-muted-foreground">
-                            Update department information
-                        </p>
-                    </div>
+                    <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
+                        Edit {department.name}
+                    </h1>
                 </div>
 
-                <Card className="max-w-2xl">
-                    <CardHeader>
-                        <CardTitle>Department Information</CardTitle>
-                        <CardDescription>
-                            Update the details for this department
-                        </CardDescription>
-                    </CardHeader>
+                <Card className="max-w-2xl py-5">
                     <CardContent>
-                        {successMessage && (
-                            <div
-                                className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950/30 dark:text-green-200"
-                                role="status"
-                            >
-                                {successMessage}
-                            </div>
-                        )}
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-2">
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                put(departments.update(department.id).url);
+                            }}
+                            className="space-y-5"
+                        >
+                            <div className="space-y-1.5">
                                 <Label htmlFor="name">
-                                    Department Name{' '}
+                                    Department name{' '}
                                     <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="name"
-                                    type="text"
-                                    value={formData.name}
+                                    value={data.name}
                                     onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            name: e.target.value,
-                                        })
+                                        setData('name', e.target.value)
                                     }
-                                    placeholder="e.g., Finance, Human Resources"
+                                    placeholder="e.g. Finance"
                                     required
-                                    disabled={isSubmitting}
+                                    autoFocus
                                 />
                                 <InputError message={errors.name} />
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-1.5">
                                 <Label htmlFor="code">
-                                    Department Code{' '}
+                                    Department code{' '}
                                     <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="code"
-                                    type="text"
-                                    value={formData.code}
+                                    value={data.code}
                                     onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            code: e.target.value.toUpperCase(),
-                                        })
+                                        setData(
+                                            'code',
+                                            e.target.value.toUpperCase(),
+                                        )
                                     }
-                                    placeholder="e.g., FIN, HR"
-                                    maxLength={10}
+                                    placeholder="e.g. FIN"
                                     required
-                                    disabled={isSubmitting}
                                 />
                                 <InputError message={errors.code} />
-                                <p className="text-sm text-muted-foreground">
-                                    Maximum 10 characters. Must be unique.
+                                <p className="text-xs text-muted-foreground">
+                                    A short identifier used on vouchers and
+                                    reports.
                                 </p>
                             </div>
 
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center gap-2">
                                 <Checkbox
                                     id="is_active"
-                                    checked={formData.is_active}
+                                    checked={data.is_active}
                                     onCheckedChange={(checked) =>
-                                        setFormData({
-                                            ...formData,
-                                            is_active: checked === true,
-                                        })
+                                        setData('is_active', Boolean(checked))
                                     }
-                                    disabled={isSubmitting}
                                 />
                                 <Label
                                     htmlFor="is_active"
-                                    className="cursor-pointer font-normal"
+                                    className="font-normal"
                                 >
-                                    Department is active
+                                    Active — can be selected on new vouchers
                                 </Label>
                             </div>
+                            <InputError message={errors.is_active} />
 
-                            {/* Action Buttons */}
+                            <Separator />
+
                             <div className="flex items-center justify-end gap-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    asChild
-                                    disabled={isSubmitting}
-                                >
-                                    <Link href={departments.index().url}>Cancel</Link>
+                                <Button type="button" variant="outline" asChild>
+                                    <Link href={departments.index().url}>
+                                        Cancel
+                                    </Link>
                                 </Button>
-                                <Button type="submit" disabled={isSubmitting}>
-                                    {isSubmitting ? (
+                                <Button type="submit" disabled={processing}>
+                                    {processing ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Updating...
+                                            Saving...
                                         </>
                                     ) : (
-                                        'Update Department'
+                                        'Save changes'
                                     )}
                                 </Button>
                             </div>

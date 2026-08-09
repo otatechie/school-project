@@ -1,0 +1,40 @@
+# Dependencies are installed inside the build stages, never copied from the host.
+/vendor
+/node_modules
+
+# Assets are built in the `assets` stage and copied from there.
+/public/build
+/public/hot
+/public/storage
+
+# Secrets must come from the deployment environment, never from an image layer.
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# Local development database
+/database/*.sqlite
+/database/*.sqlite-journal
+
+# Runtime state — the container generates its own.
+/storage/app/*
+!/storage/app/.gitignore
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/bootstrap/cache/*
+
+# Tooling and history that have no place in a runtime image
+.git
+.github
+.vscode
+.idea
+.cursor
+.claude
+/tests
+/docs
+phpunit.xml
+*.md
+!README.md

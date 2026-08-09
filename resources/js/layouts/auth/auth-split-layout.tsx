@@ -13,14 +13,15 @@ export default function AuthSplitLayout({
     return (
         <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
             <div className="relative hidden h-full flex-col justify-between overflow-hidden p-10 text-white lg:flex dark:border-r">
-                {/* Hero image from public folder */}
+                {/* Decorative only — the heading beside it carries the
+                    meaning, so it is hidden from screen readers. */}
                 <img
                     src="/images/hero.jpg"
-                    alt="Digital accounting operations"
+                    alt=""
+                    aria-hidden="true"
                     className="absolute inset-0 h-full w-full object-cover"
                 />
-                {/* Overlay for better text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/25" />
 
                 <Link
                     href={home()}
@@ -29,10 +30,12 @@ export default function AuthSplitLayout({
                     <AppLogoIcon className="mr-2 size-8 fill-current text-white" />
                     {name}
                 </Link>
-                <div className="relative z-20 max-w-md space-y-4">
-                    <h2 className="text-2xl font-bold">Digital Accounting Operations</h2>
-                    <p className="text-sm leading-relaxed text-white/90">
-                        Transform manual processes into automated workflows. Reduce errors, improve processing speed, and gain real-time visibility with seamless GIFMIS integration.
+                <div className="relative z-20 max-w-sm space-y-2">
+                    <h2 className="text-2xl font-bold">
+                        Every payment, on the record
+                    </h2>
+                    <p className="text-sm text-white/80">
+                        Adentan Municipal Education Office
                     </p>
                 </div>
             </div>

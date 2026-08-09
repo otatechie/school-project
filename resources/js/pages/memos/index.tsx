@@ -1,15 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, FileText, Plus, Search } from 'lucide-react';
-import { useState } from 'react';
+import {Head, Link, router } from '@inertiajs/react';
+import { FileText, Plus, Printer, Search } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -18,69 +12,62 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
+import FlashMessages from '@/components/flash-messages';
+import TablePagination from '@/components/table-pagination';
 import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
 import memos from '@/routes/memos';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, Paginated } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Memos', href: memos.index().url },
 ];
 
-const mockMemos = [
-    {
-        id: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
-        memo_number: 'MEMO-2024-001',
-        memo_date: '2024-01-27',
-        subject: 'Budget approval for Q1',
-        to_name: 'Finance Director',
-        from_name: 'Admin Office',
-        status: 'finalized',
-    },
-    {
-        id: '01ARZ3NDEKTSV4RRFFQ69G5FB0',
-        memo_number: 'MEMO-2024-002',
-        memo_date: '2024-01-26',
-        subject: 'Payment voucher clearance',
-        to_name: 'Accounts Department',
-        from_name: 'Finance Director',
-        status: 'draft',
-    },
-    {
-        id: '01ARZ3NDEKTSV4RRFFQ69G5FB1',
-        memo_number: 'MEMO-2024-003',
-        memo_date: '2024-01-25',
-        subject: 'Staff training schedule',
-        to_name: 'HR Department',
-        from_name: 'Director',
-        status: 'printed',
-    },
-];
+type Memo = {
+    id: string;
+    memo_number: string;
+    memo_date: string;
+    memo_date_label: string;
+    subject: string;
+    to_name: string;
+    from_name: string;
+    status: string;
+    department: { id: string; name: string } | null;
+};
 
-type StatusFilter = 'all' | 'draft' | 'finalized' | 'printed';
+type Props = {
+    memos: Paginated<Memo>;
+    stats: { total: number; draft: number; finalized: number; printed: number };
+    filters: { search?: string; status?: string };
+};
 
-export default function Index() {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+export default function MemosIndex({ memos: data, stats, filters }: Props) {
+    const [searchQuery, setSearchQuery] = useState(filters.search ?? '');
+    const [statusFilter, setStatusFilter] = useState(filters.status ?? 'all');
+    const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const filteredMemos = mockMemos.filter((m) => {
-        if (statusFilter !== 'all' && m.status !== statusFilter) return false;
-        if (!searchQuery.trim()) return true;
-        const q = searchQuery.toLowerCase();
-        return (
-            m.memo_number.toLowerCase().includes(q) ||
-            m.subject.toLowerCase().includes(q) ||
-            m.to_name.toLowerCase().includes(q)
+    useEffect(
+        () => () => {
+            if (timer.current) clearTimeout(timer.current);
+        },
+        [],
+    );
+
+    const items = data.data ?? [];
+    const isFiltered = Boolean(filters.search || filters.status);
+
+    const applyFilters = (search: string, status: string) => {
+        router.get(
+            memos.index().url,
+            {
+                search: search || undefined,
+                status: status === 'all' ? undefined : status,
+            },
+            { preserveState: true, replace: true },
         );
-    });
-    const draftCount = mockMemos.filter((m) => m.status === 'draft').length;
-    const finalizedCount = mockMemos.filter(
-        (m) => m.status === 'finalized' || m.status === 'printed'
-    ).length;
+    };
 
     const statusVariant = (
-        status: string
+        status: string,
     ): 'default' | 'secondary' | 'outline' => {
         if (status === 'printed') return 'default';
         if (status === 'finalized') return 'secondary';
@@ -90,220 +77,225 @@ export default function Index() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Memos" />
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
-                <header className="space-y-1">
-                    <Button variant="ghost" size="sm" asChild className="-ml-2">
-                        <Link href={dashboard().url} className="gap-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            <span>Back to Dashboard</span>
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4 md:p-6">
+                <FlashMessages />
+
+                <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold text-black md:text-3xl dark:text-white">
+                            Memos
+                        </h1>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {stats.total} total &middot; {stats.draft} draft
+                            &middot; {stats.finalized} finalized &middot;{' '}
+                            {stats.printed} printed
+                        </p>
+                    </div>
+                    <Button asChild>
+                        <Link href={memos.create().url} className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            <span>New memo</span>
                         </Link>
                     </Button>
-                    <h1 className="text-3xl font-semibold text-black dark:text-white">
-                        Memos
-                    </h1>
-                    <p className="text-base text-muted-foreground">
-                        Create and manage internal memorandums
-                    </p>
                 </header>
 
-                <section aria-labelledby="memos-stats-heading">
-                    <h2 id="memos-stats-heading" className="sr-only">
-                        Memo statistics
-                    </h2>
-                    <div className="grid gap-4 md:grid-cols-3">
-                        <Card>
-                            <CardContent className="pt-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Total Memos
-                                        </p>
-                                        <p className="mt-1 text-2xl font-bold text-black dark:text-white">
-                                            {mockMemos.length}
-                                        </p>
-                                    </div>
-                                    <FileText className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardContent className="pt-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Draft
-                                        </p>
-                                        <p className="mt-1 text-2xl font-bold text-black dark:text-white">
-                                            {draftCount}
-                                        </p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardContent className="pt-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Finalized / Printed
-                                        </p>
-                                        <p className="mt-1 text-2xl font-bold text-black dark:text-white">
-                                            {finalizedCount}
-                                        </p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </section>
-
-                <Card>
-                    <CardHeader>
+                <Card className="py-5">
+                    <CardContent className="space-y-4">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <CardTitle>All Memos</CardTitle>
-                                <CardDescription className="mt-1">
-                                    {filteredMemos.length} memo{filteredMemos.length !== 1 ? 's' : ''}{' '}
-                                    found
-                                    {(searchQuery || statusFilter !== 'all') &&
-                                        ` (filtered)`}
-                                </CardDescription>
+                            <CardDescription>
+                                {data.total} memo{data.total !== 1 ? 's' : ''}
+                                {isFiltered ? ' (filtered)' : ''}
+                            </CardDescription>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                <div className="relative w-full sm:w-64">
+                                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        type="search"
+                                        placeholder="Search number, subject or recipient..."
+                                        value={searchQuery}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setSearchQuery(value);
+                                            if (timer.current)
+                                                clearTimeout(timer.current);
+                                            timer.current = setTimeout(
+                                                () =>
+                                                    applyFilters(
+                                                        value,
+                                                        statusFilter,
+                                                    ),
+                                                300,
+                                            );
+                                        }}
+                                        className="pl-9"
+                                    />
+                                </div>
+                                <Select
+                                    value={statusFilter}
+                                    onValueChange={(v) => {
+                                        setStatusFilter(v);
+                                        applyFilters(searchQuery, v);
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full sm:w-[170px]">
+                                        <SelectValue placeholder="Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">
+                                            All statuses
+                                        </SelectItem>
+                                        <SelectItem value="draft">
+                                            Draft
+                                        </SelectItem>
+                                        <SelectItem value="finalized">
+                                            Finalized
+                                        </SelectItem>
+                                        <SelectItem value="printed">
+                                            Printed
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            <Button asChild>
-                                <Link href={memos.create().url} className="gap-2">
-                                    <Plus className="h-4 w-4" />
-                                    <span>New Memo</span>
-                                </Link>
-                            </Button>
                         </div>
-                    </CardHeader>
 
-                    <CardContent>
-                        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                <Input
-                                    type="search"
-                                    placeholder="Search by memo number, subject, or recipient..."
-                                    value={searchQuery}
-                                    onChange={(e) =>
-                                        setSearchQuery(e.target.value)
-                                    }
-                                    className="pl-9"
+                        {items.length === 0 ? (
+                            <div className="py-10 text-center">
+                                <FileText
+                                    className="mx-auto mb-3 h-10 w-10 text-muted-foreground"
+                                    aria-hidden="true"
                                 />
-                            </div>
-                            <Select
-                                value={statusFilter}
-                                onValueChange={(v) =>
-                                    setStatusFilter(v as StatusFilter)
-                                }
-                            >
-                                <SelectTrigger className="w-full sm:w-[160px]">
-                                    <SelectValue placeholder="Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All statuses</SelectItem>
-                                    <SelectItem value="draft">Draft</SelectItem>
-                                    <SelectItem value="finalized">Finalized</SelectItem>
-                                    <SelectItem value="printed">Printed</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <Separator className="mb-6" />
-
-                        {filteredMemos.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                                <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-                                <h3 className="mb-2 text-lg font-semibold text-black dark:text-white">
-                                    {searchQuery || statusFilter !== 'all'
-                                        ? 'No memos found'
+                                <p className="text-sm font-medium text-black dark:text-white">
+                                    {isFiltered
+                                        ? 'No memos match your filters'
                                         : 'No memos yet'}
-                                </h3>
-                                <p className="mb-4 text-sm text-muted-foreground">
-                                    {searchQuery || statusFilter !== 'all'
-                                        ? 'No memos match your search or filter. Try changing them.'
-                                        : 'Create a memo to get started.'}
                                 </p>
-                                {!searchQuery && (
-                                    <Button asChild>
-                                        <Link href={memos.create().url} className="gap-2">
-                                            <Plus className="h-4 w-4" />
-                                            <span>New Memo</span>
+                                {isFiltered ? (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="mt-3"
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setStatusFilter('all');
+                                            applyFilters('', 'all');
+                                        }}
+                                    >
+                                        Clear filters
+                                    </Button>
+                                ) : (
+                                    <Button asChild size="sm" className="mt-3">
+                                        <Link href={memos.create().url}>
+                                            New memo
                                         </Link>
                                     </Button>
                                 )}
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full" role="table">
-                                    <thead>
-                                        <tr className="border-b border-border bg-muted/30">
-                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
-                                                Memo No
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
-                                                Date
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
-                                                Subject
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
-                                                To
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
-                                                Status
-                                            </th>
-                                            <th className="px-4 py-3 text-right text-sm font-semibold text-black dark:text-white">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredMemos.map((memo) => (
-                                            <tr
-                                                key={memo.id}
-                                                className="border-b border-border transition-colors hover:bg-muted/50"
-                                            >
-                                                <td className="px-4 py-4">
-                                                    <code className="rounded-md bg-muted px-2.5 py-1.5 text-sm font-mono font-medium text-muted-foreground">
-                                                        {memo.memo_number}
-                                                    </code>
-                                                </td>
-                                                <td className="px-4 py-4 text-sm text-muted-foreground">
-                                                    {memo.memo_date}
-                                                </td>
-                                                <td className="px-4 py-4 text-sm text-black dark:text-white">
-                                                    {memo.subject}
-                                                </td>
-                                                <td className="px-4 py-4 text-sm text-muted-foreground">
-                                                    {memo.to_name}
-                                                </td>
-                                                <td className="px-4 py-4">
-                                                    <Badge
-                                                        variant={statusVariant(
-                                                            memo.status
-                                                        )}
-                                                    >
-                                                        {memo.status}
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-4 py-4">
-                                                    <div className="flex justify-end gap-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            disabled
-                                                        >
-                                                            View
-                                                        </Button>
-                                                    </div>
-                                                </td>
+                            <>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="border-b border-border bg-muted/30">
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
+                                                    Memo No.
+                                                </th>
+                                                <th className="hidden lg:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">Date</th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
+                                                    Subject
+                                                </th>
+                                                <th className="hidden md:table-cell px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">To</th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-white">
+                                                    Status
+                                                </th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold text-black dark:text-white">
+                                                    Actions
+                                                </th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                            {items.map((memo) => (
+                                                <tr
+                                                    key={memo.id}
+                                                    className="border-b border-border transition-colors hover:bg-muted/50"
+                                                >
+                                                    <td className="px-4 py-3">
+                                                        <code className="rounded-md bg-muted px-2 py-1 font-mono text-sm font-medium text-muted-foreground">
+                                                            {memo.memo_number}
+                                                        </code>
+                                                    </td>
+                                                    <td className="hidden lg:table-cell px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
+                                                        {memo.memo_date_label}
+                                                    </td>
+                                                    <td className="max-w-xs px-4 py-3 text-sm text-black dark:text-white">
+                                                        {memo.subject}
+                                                    </td>
+                                                    <td className="hidden md:table-cell px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
+                                                        {memo.to_name}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <Badge
+                                                            variant={statusVariant(
+                                                                memo.status,
+                                                            )}
+                                                            className="capitalize"
+                                                        >
+                                                            {memo.status}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            {memo.status ===
+                                                                'draft' && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    onClick={() =>
+                                                                        router.post(
+                                                                            memos.finalize(
+                                                                                memo.id,
+                                                                            )
+                                                                                .url,
+                                                                            {},
+                                                                            {
+                                                                                preserveScroll: true,
+                                                                            },
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Finalize
+                                                                </Button>
+                                                            )}
+                                                            {memo.status ===
+                                                                'finalized' && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    className="gap-2"
+                                                                    onClick={() =>
+                                                                        router.post(
+                                                                            memos.print(
+                                                                                memo.id,
+                                                                            )
+                                                                                .url,
+                                                                            {},
+                                                                            {
+                                                                                preserveScroll: true,
+                                                                            },
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Printer className="h-4 w-4" />
+                                                                    Mark printed
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <TablePagination page={data} />
+                            </>
                         )}
                     </CardContent>
                 </Card>
