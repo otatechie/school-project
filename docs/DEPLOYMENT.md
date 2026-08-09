@@ -11,8 +11,8 @@ one and configuring it as if it were the other is the most common cause of a
 | | **Compose** | **Application** |
 |---|---|---|
 | Dokploy service type | Compose | Application |
-| Uses `docker-compose.yml` | Yes | **No — ignored entirely** |
-| Creates a MySQL container | Yes, automatically | **No — you must create one** |
+| Uses `docker-compose.yml` | Yes | **No, ignored entirely** |
+| Creates a MySQL container | Yes, automatically | **No, you must create one** |
 | `DB_HOST` | `db` | the database service's own hostname |
 | Port to expose | handled by compose | **8080** under Domains (Dokploy's default) |
 
@@ -21,7 +21,7 @@ read at all. There is no `db` service, and `DB_HOST=db` resolves to nothing.
 
 ---
 
-## Option A — Compose (simplest)
+## Option A: Compose (simplest)
 
 Dokploy creates both the app and its database from `docker-compose.yml`.
 
@@ -31,12 +31,12 @@ Dokploy creates both the app and its database from `docker-compose.yml`.
 4. Under **Domains**, add `govpay.win` → service `app`, port `8080`
 5. Deploy
 
-`DB_HOST=db` is correct here — it is the name of the service in the compose
+`DB_HOST=db` is correct here: it is the name of the service in the compose
 file.
 
 ---
 
-## Option B — Application
+## Option B: Application
 
 You are running only the app, so the database must exist separately.
 
@@ -47,7 +47,7 @@ You are running only the app, so the database must exist separately.
 3. Under **Domains**, add `govpay.win`. The port is **8080**, which is
    Dokploy's default, so it usually needs no change.
 4. Under **Environment**, set the variables below. `DB_HOST` must be the
-   database service's hostname from step 1 — not `db`, and never `127.0.0.1`,
+   database service's hostname from step 1, not `db`, and never `127.0.0.1`,
    which is the app container itself.
 
 ```

@@ -123,11 +123,21 @@ export default function Rejected({
                                                 <div className="flex items-start justify-between">
                                                     <div className="space-y-2">
                                                         <div className="flex items-center gap-3">
-                                                            <span className="font-semibold text-black dark:text-white">
+                                                            <Link
+                                                                href={
+                                                                    paymentVouchers.show(
+                                                                        {
+                                                                            voucher:
+                                                                                voucher.id,
+                                                                        },
+                                                                    ).url
+                                                                }
+                                                                className="font-semibold text-black underline-offset-4 hover:underline dark:text-white"
+                                                            >
                                                                 {
                                                                     voucher.voucher_number
                                                                 }
-                                                            </span>
+                                                            </Link>
                                                         </div>
                                                         <p className="text-sm font-medium text-black dark:text-white">
                                                             {voucher.payee_name}

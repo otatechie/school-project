@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     CheckCircle2,
     Clock,
@@ -308,11 +308,21 @@ export default function Pending({
                                                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                                                         <div className="min-w-0 space-y-1">
                                                             <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                                                                <span className="font-mono text-sm text-muted-foreground">
+                                                                <Link
+                                                                    href={
+                                                                        paymentVouchers.show(
+                                                                            {
+                                                                                voucher:
+                                                                                    voucher.id,
+                                                                            },
+                                                                        ).url
+                                                                    }
+                                                                    className="font-mono text-sm text-muted-foreground underline-offset-4 hover:underline"
+                                                                >
                                                                     {
                                                                         voucher.voucher_number
                                                                     }
-                                                                </span>
+                                                                </Link>
                                                                 {/* The amount
                                                                     drives the
                                                                     decision, so

@@ -60,11 +60,24 @@ class DatabaseSeeder extends Seeder
      */
     private function staff(array $departments): array
     {
-        $make = fn (array $attributes) => User::factory()->create([
-            'password' => Hash::make(config('demo.password')),
-            'is_active' => true,
-            ...$attributes,
-        ]);
+        // Deliberately not User::factory(): factories call fake(), which lives
+        // in require-dev and is absent from the production image, so seeding on
+        // deploy would fail with "undefined function fake()". Every field the
+        // factory would generate is overridden here anyway.
+        $make = function (array $attributes): User {
+            $user = new User([
+                'password' => Hash::make(config('demo.password')),
+                'is_active' => true,
+                ...$attributes,
+            ]);
+
+            // Not fillable, and deliberately so: nothing in the application may
+            // mark an account verified through mass assignment.
+            $user->email_verified_at = now();
+            $user->save();
+
+            return $user;
+        };
 
         $superadmin = config('demo.superadmin');
 
@@ -365,7 +378,7 @@ class DatabaseSeeder extends Seeder
         $paid = PaymentVoucher::where('status', 'paid')->orderBy('paid_at')->get();
 
         $entries = [
-            ['Payment for classroom furniture — Adentan Community Basic School', 'printed'],
+            ['Payment for classroom furniture at Adentan Community Basic School', 'printed'],
             ['Settlement of second quarter utility bills', 'printed'],
             ['Payment for third term examination materials', 'finalized'],
             ['Repair works at Adentan Senior High School laboratory', 'finalized'],
@@ -505,7 +518,7 @@ class DatabaseSeeder extends Seeder
                     'user_id' => $approver->id,
                     'type' => 'voucher.pending',
                     'title' => "Voucher {$voucher->voucher_number} awaits approval",
-                    'body' => $voucher->payee_name.' — GHS '.number_format((float) $voucher->amount, 2),
+                    'body' => $voucher->payee_name.', GHS '.number_format((float) $voucher->amount, 2),
                     'link' => '/payment-vouchers/pending',
                     'created_at' => $voucher->submitted_at,
                 ]));

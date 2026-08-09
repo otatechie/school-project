@@ -289,7 +289,7 @@ export default function UserForm({
                                         htmlFor="is_active"
                                         className="font-normal"
                                     >
-                                        Active — can sign in
+                                        Active: can sign in
                                     </Label>
                                 </div>
                             </div>

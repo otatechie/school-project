@@ -13,6 +13,16 @@ class PaymentVoucherPolicy
         return $user->is_active;
     }
 
+    /**
+     * A voucher is readable by any active member of staff. Approved and paid
+     * vouchers are records the whole finance office works from, so reading one
+     * is deliberately wider than changing it.
+     */
+    public function view(User $user, PaymentVoucher $voucher): bool
+    {
+        return $user->is_active;
+    }
+
     public function create(User $user): bool
     {
         return $user->hasRole(User::ROLE_ADMIN, User::ROLE_FINANCE_OFFICER);

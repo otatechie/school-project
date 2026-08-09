@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -62,7 +63,13 @@ class PaymentVoucher extends Model
      *
      * @var list<string>
      */
-    protected $appends = ['voucher_date_label', 'submitted_at_label', 'paid_at_label'];
+    protected $appends = [
+        'voucher_date_label',
+        'submitted_at_label',
+        'approved_at_label',
+        'rejected_at_label',
+        'paid_at_label',
+    ];
 
     protected function voucherDateLabel(): Attribute
     {
@@ -72,6 +79,16 @@ class PaymentVoucher extends Model
     protected function submittedAtLabel(): Attribute
     {
         return Attribute::get(fn () => Dates::short($this->submitted_at));
+    }
+
+    protected function approvedAtLabel(): Attribute
+    {
+        return Attribute::get(fn () => Dates::short($this->approved_at));
+    }
+
+    protected function rejectedAtLabel(): Attribute
+    {
+        return Attribute::get(fn () => Dates::short($this->rejected_at));
     }
 
     protected function paidAtLabel(): Attribute
@@ -112,5 +129,10 @@ class PaymentVoucher extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
+    }
+
+    public function ledgerEntries(): HasMany
+    {
+        return $this->hasMany(LedgerEntry::class, 'payment_voucher_id');
     }
 }

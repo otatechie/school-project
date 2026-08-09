@@ -19,6 +19,8 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('payment-vouchers/pending', [PaymentVoucherController::class, 'pending'])->name('payment-vouchers.pending');
     Route::get('payment-vouchers/rejected', [PaymentVoucherController::class, 'rejected'])->name('payment-vouchers.rejected');
     Route::get('payment-vouchers/{voucher}/edit', [PaymentVoucherController::class, 'edit'])->name('payment-vouchers.edit');
+    // Registered after create/pending/rejected so the wildcard cannot swallow them.
+    Route::get('payment-vouchers/{voucher}', [PaymentVoucherController::class, 'show'])->name('payment-vouchers.show');
     Route::post('payment-vouchers', [PaymentVoucherController::class, 'store'])->name('payment-vouchers.store');
     Route::put('payment-vouchers/{voucher}', [PaymentVoucherController::class, 'update'])->name('payment-vouchers.update');
     Route::delete('payment-vouchers/{voucher}', [PaymentVoucherController::class, 'destroy'])->name('payment-vouchers.destroy');

@@ -136,7 +136,7 @@ export default function Login({
             {isDemo && (
                 <div className="space-y-2 border-t border-border pt-4">
                     <p className="text-xs text-muted-foreground">
-                        Demo accounts &mdash; select one to fill the form:
+                        Demo accounts, select one to fill the form:
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                         {demoAccounts?.map((account) => (

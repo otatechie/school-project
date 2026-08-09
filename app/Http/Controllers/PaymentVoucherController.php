@@ -89,6 +89,36 @@ class PaymentVoucherController extends Controller
             ->with('success', "Payment voucher {$voucher->voucher_number} created successfully.");
     }
 
+    public function show(Request $request, PaymentVoucher $voucher): Response
+    {
+        $this->authorize('view', $voucher);
+
+        $voucher->load([
+            'department',
+            'creator',
+            'approver',
+            'rejector',
+            'payer',
+            'documents.uploader:id,name',
+            'ledgerEntries.account',
+        ]);
+
+        return Inertia::render('payment-vouchers/show', [
+            'voucher' => $voucher,
+            'attachments' => $voucher->documents->map(fn ($document) => [
+                'id' => $document->id,
+                'name' => $document->name,
+                'size' => $document->size,
+                'created_at' => $document->created_at,
+                'uploader' => $document->uploader?->only(['id', 'name']),
+                // Nothing is removable from a read-only page, whatever the
+                // viewer's role.
+                'can_delete' => false,
+            ]),
+            'canUpdate' => $request->user()->can('update', $voucher),
+        ]);
+    }
+
     public function edit(Request $request, PaymentVoucher $voucher)
     {
         $this->authorize('update', $voucher);
@@ -160,7 +190,7 @@ class PaymentVoucherController extends Controller
             $voucher,
             'voucher.pending',
             "Voucher {$voucher->voucher_number} awaits approval",
-            "{$voucher->payee_name} — GHS ".number_format((float) $voucher->amount, 2),
+            "{$voucher->payee_name}, GHS ".number_format((float) $voucher->amount, 2),
             route('payment-vouchers.pending'),
         );
 

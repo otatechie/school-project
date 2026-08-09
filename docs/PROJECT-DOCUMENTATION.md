@@ -1,4 +1,4 @@
-# GovPay Desk — Project Documentation
+# GovPay Desk Project Documentation
 
 An expenditure control system for a Ghanaian district education office, built
 as a CSIT622 capstone project.
@@ -24,6 +24,35 @@ Sign-in credentials appear on the sign-in page while demonstration mode is on.
 12. [Deployment](#12-deployment)
 13. [Design decisions and their grounding](#13-design-decisions-and-their-grounding)
 14. [Known limitations](#14-known-limitations)
+15. [Challenges encountered and their solutions](#15-challenges-encountered-and-their-solutions)
+16. [Future improvements](#16-future-improvements)
+17. [Individual contribution](#17-individual-contribution)
+18. [References](#18-references)
+
+---
+
+## Access for the examiner
+
+**Live application:** https://govpay.win
+**Source code:** https://github.com/otatechie/school-project
+
+There is no separate administrative URL. Administration is part of the
+application and appears for accounts holding the Administrator role.
+
+| Role | Email | What it can do |
+|---|---|---|
+| Superadmin | `superadmin@govpay.test` | Everything, including staff and departments |
+| Accountant | `accountant@govpay.test` | Prepare vouchers and memos, record payments |
+| Approver | `approver@govpay.test` | Approve up to GHS 50,000 |
+| Senior approver | `senior@govpay.test` | Approve up to GHS 250,000 |
+| Auditor | `auditor@govpay.test` | Read-only across the system |
+
+All demo accounts use the password `password`. The sign-in page lists them and
+fills the form on selection, so no typing is required.
+
+The system is seeded with a working history (approved and paid vouchers, a
+balanced ledger, memos and an audit trail), so every screen has data on first
+sign-in.
 
 ---
 
@@ -95,7 +124,7 @@ Five things are guaranteed, not merely encouraged:
 - Role-based access control with four roles
 - In-app notifications routed by approval authority
 
-### Not implemented — deliberate scope boundary
+### Not implemented: a deliberate scope boundary
 
 - **OCR capture of scanned receipts.** Requires a vision pipeline and a
   document-quality corpus that a single-term project cannot validate.
@@ -140,7 +169,7 @@ The system therefore uses **two layers**, each doing what it is suited to:
 
 | Layer | Catches | Cost | Explainability |
 |---|---|---|---|
-| Deterministic rules (`VoucherChecks`) | Duplicates, statistical outliers, budget-line mismatch | Free, instant | Complete — traceable to one comparison |
+| Deterministic rules (`VoucherChecks`) | Duplicates, statistical outliers, budget-line mismatch | Free, instant | Complete; traceable to one comparison |
 | LLM (`VoucherIntelligence`) | Semantic inconsistency, first-time payees, estimate-shaped amounts | Metered API call | Natural-language reasoning the approver can disagree with |
 
 Rules run first because they are free and always available. The LLM is invoked
@@ -157,7 +186,7 @@ supplied. The review prompt explicitly forbids speculation about fraud.
 
 **Graceful degradation.** No API key, a network failure, a timeout or a refusal
 all resolve to `null`. The feature reports itself unavailable and every manual
-workflow is untouched. Nothing in `VoucherIntelligence` can break a request —
+workflow is untouched. Nothing in `VoucherIntelligence` can break a request;
 each failure is caught and logged.
 
 **Auditability.** Consulting the AI writes `voucher.ai_reviewed` or
@@ -214,7 +243,7 @@ After changing routes:
 php artisan wayfinder:generate --with-form
 ```
 
-The `--with-form` flag matters — without it the `.form` variants that the
+The `--with-form` flag matters: without it the `.form` variants that the
 authentication pages rely on disappear.
 
 ---
@@ -239,7 +268,7 @@ record counts the way sequential integers do.
 `payment_vouchers` stores a separate actor and timestamp for each transition
 (`submitted_at`, `approved_by`/`approved_at`, `rejected_by`/`rejected_at`,
 `paid_by`/`paid_at`). Ageing is therefore derived from real data. Where a
-timestamp is absent the interface says "unknown" rather than showing zero —
+timestamp is absent the interface says "unknown" rather than showing zero;
 telling an approver a voucher is fresh when its age is unknown would be a
 fabrication.
 
@@ -250,36 +279,33 @@ fabrication.
 ### Approach
 
 Every route sits behind `auth`, `verified` and `active` middleware. Every
-controller action authorizes against a policy. A security test suite is written
-from the attacker's perspective: each test describes a way one user might reach
-another's data or exceed their authority.
+controller action authorizes against a policy. The security test suite is
+written from the attacker's perspective: each test attempts to reach another
+user's data or exceed its own authority, and asserts that the attempt fails.
 
-### Audit findings and fixes
+### Authorization controls
 
-A systematic audit of every route against its authorization found **14
-vulnerabilities**, all since fixed and covered by regression tests:
+Authority is expressed as policies rather than as checks scattered through the
+interface. Hiding a button is a convenience; the policy is what actually
+decides. Each control below is asserted by a test that attempts the action as
+an unauthorized user and expects a refusal.
 
-| Vulnerability | Severity | Fix |
-|---|---|---|
-| Any authenticated user could create an administrator account | Critical | `UserPolicy`, admin-only |
-| Any user could change any user's role, including self-promotion | Critical | `UserPolicy` on update |
-| Any user could read the full system audit log | High | Admin-only check |
-| Any user could list all staff | High | `UserPolicy::viewAny` |
-| A Viewer could create, edit or delete departments | High | `DepartmentPolicy` |
-| A Viewer could create payment vouchers | High | `authorize('create')` on store |
-| Any user could delete any voucher, including paid ones | High | `authorize('delete')`, drafts only |
-| A Viewer could create and finalize memos | Medium | `MemoPolicy` |
-| A deactivated user kept full access until session expiry | Medium | `EnsureUserIsActive` middleware |
-| An approver could release any amount regardless of limit | Medium | `ApprovalRouter::canApprove` in policy |
-| A department with vouchers could be deleted, orphaning records | Medium | `DepartmentPolicy::delete` |
-| An administrator could remove their own admin role, locking the office out | Medium | Validation rule |
-| Unthrottled AI endpoints against a metered API | Low | `throttle:20,1` |
-| Missing CSRF meta tag broke authenticated fetch calls | Low | Added to the root template |
+| Control | Enforced by |
+|---|---|
+| Only an administrator can create staff accounts or change a role | `UserPolicy` |
+| An administrator cannot remove their own admin role, so the office cannot be locked out | Validation rule |
+| Only an administrator can read the system log | `SystemLogController` |
+| A Viewer can read but cannot create or alter vouchers, memos or departments | `PaymentVoucherPolicy`, `MemoPolicy`, `DepartmentPolicy` |
+| An approver cannot release an amount above their band | `ApprovalRouter::canApprove`, called from `PaymentVoucherPolicy::review` |
+| Only a draft voucher can be deleted; approved and paid vouchers are permanent | `PaymentVoucherPolicy::delete` |
+| A department holding vouchers cannot be deleted | `DepartmentPolicy::delete` |
+| Deactivating a user ends their session on their next request | `EnsureUserIsActive` middleware |
+| AI endpoints are rate limited against a metered API | `throttle:20,1` |
 
 ### Other controls
 
 - **Mass assignment:** every model uses `$fillable`; no model uses `$guarded`.
-  A forged `status` or `approved_by` field on voucher creation is ignored —
+  A forged `status` or `approved_by` field on voucher creation is ignored;
   covered by test.
 - **SQL injection:** no raw interpolation. Aggregates use fixed
   `selectRaw` strings with no user input.
@@ -319,7 +345,7 @@ and falls back to **5900 General Expenses**:
 
 Cheque and cash credit **1100 Cash**; bank transfers credit **1200 Bank**.
 
-Posting is idempotent — a voucher already in the ledger will not post twice.
+Posting is idempotent: a voucher already in the ledger will not post twice.
 The ledger pages show a running balance check that turns red if debits and
 credits diverge.
 
@@ -339,7 +365,7 @@ excluding rejected vouchers and the voucher itself.
 
 **Statistical outlier detection.** Computes the sample standard deviation of
 the department's paid vouchers and flags anything at or above 2σ. Requires at
-least five prior vouchers — below that the spread is meaningless, so the check
+least five prior vouchers; below that the spread is meaningless, so the check
 declines to report rather than producing a confident-sounding finding from two
 data points. Zero deviation is handled explicitly.
 
@@ -394,7 +420,7 @@ npx vite build          # production build
 | `PagesLoadTest` | Every page returns 200 |
 
 The outlier tests deliberately include cases where the check must stay
-**silent** — too little history, zero deviation, an amount below the mean.
+**silent**: too little history, zero deviation, an amount below the mean.
 A check that fires on everything is not a check.
 
 ---
@@ -477,7 +503,7 @@ Stated plainly:
   journal entry, no reversal, and no period close.
 - **Budget lines are free text.** A production system would use a foreign key
   to `accounts`, removing the need for keyword mapping entirely.
-- **Search is unindexed** — `LIKE` queries, adequate at this data volume.
+- **Search is unindexed**: `LIKE` queries, adequate at this data volume.
 - **New accounts share a default password.** There is no invite or
   administrator-initiated reset flow.
 - **The AI features require an API key** and a metered external service. Both
@@ -488,4 +514,133 @@ Stated plainly:
 
 ---
 
-*GovPay Desk — CSIT622 Capstone Project*
+## 15. Challenges encountered and their solutions
+
+### Authorization written after the interface
+
+The first version hid buttons a user could not use and treated that as access
+control. It is not: hiding a control changes nothing about the route behind it.
+Writing the security suite exposed how much authority was being decided in the
+browser, and the fix was to move every decision into a policy and let the
+interface read the same policy through Inertia's shared props. The interface
+and the server now answer from one source, so they cannot disagree.
+
+### An AI feature that had to fail safely
+
+An external API introduces a dependency the office does not control. If the
+key is missing, the service is slow, or the response is malformed, a clerk
+should still be able to raise a voucher. Every AI call is therefore optional
+and out of the critical path: the drafting and checking features degrade to
+absence rather than to an error, and no approval or payment depends on one.
+
+### Deterministic checks were the right tool, not the interesting one
+
+The duplicate, outlier and budget-line checks were initially considered as a
+classification problem. They are better as arithmetic. A duplicate is a query;
+an outlier is a standard deviation; a budget-line mismatch is keyword scoring.
+Each explains itself in one sentence, which matters when the output is shown to
+someone deciding whether to release public money. A model that cannot say why
+it flagged a voucher is not usable in that setting.
+
+### A false warning that undermined trust
+
+The duplicate check reported that a matching voucher "was paid" regardless of
+its actual status. A pending voucher was therefore described as paid: a
+warning that was wrong in a way the reader could not detect. The message now
+reads the status and says either "was paid on" or "was raised on". The lesson
+generalises: a check that is confidently wrong is worse than no check, because
+users calibrate their trust on the messages they can verify.
+
+### Deployment: three failures, three different causes
+
+Containerising the application surfaced problems that never appear in local
+development:
+
+- **The asset build needed PHP.** The Wayfinder plugin shells out to
+  `php artisan wayfinder:generate` during `npm run build`, so a Node-only build
+  stage failed with `Could not open input file: artisan`. Solved by building
+  assets on the PHP image with Node added, rather than the reverse.
+- **Removing build dependencies broke the runtime.** `apk del libpng-dev` also
+  removes `libpng`, which the compiled `gd` extension loads on every request.
+  Solved by separating runtime libraries from build headers, and by dropping
+  `gd` entirely once it proved unused.
+- **A healthy container still returned 502.** The proxy was routing to port
+  8080 while the container listened on 80. The logs showed nginx and php-fpm
+  running normally, which is precisely what makes this failure hard to read: a
+  correct application behind a misrouted proxy looks like an application fault.
+
+Each was diagnosed by making the failure louder: a startup banner naming the
+problem, an extension check that fails the build rather than warning on every
+request, and a health endpoint that answers without touching the database, so
+that a database fault and a routing fault produce different symptoms.
+
+---
+
+## 16. Future improvements
+
+In rough order of value to the office:
+
+- **Budget lines as records rather than text.** A foreign key to `accounts`
+  would remove the keyword-mapping check entirely, replacing a heuristic with a
+  constraint.
+- **Budget ceilings and commitment tracking.** The system records what was
+  spent but not what remains. Warning at the point of preparation that a line
+  is nearly exhausted would prevent the overspend rather than report it.
+- **Administrator-initiated invitations.** New accounts currently share a
+  default password. A signed invitation link with a forced first-login reset
+  removes that weakness.
+- **Bank reconciliation.** Importing a bank statement and matching it against
+  paid vouchers would close the loop between the ledger and the actual account.
+- **Period close and reversals.** The ledger is presently append-only in one
+  direction. Real bookkeeping needs a correcting entry and a closed period that
+  refuses further posting.
+- **Full-text search.** `LIKE` queries are adequate at this volume and will not
+  remain so.
+- **Offline preparation.** Connectivity at district offices is intermittent.
+  Allowing a voucher to be drafted offline and synchronised later would fit how
+  the office actually works.
+
+---
+
+## 17. Individual contribution
+
+> **To be completed by the submitting student.** The examination is
+> individually assessed: this section must describe your own work in your own
+> words, and should not be shared between group members.
+>
+> Cover, briefly and specifically:
+> - which modules or features you personally designed and built
+> - which decisions recorded in §13 were yours, and what you weighed
+> - what you learned, including anything you would now do differently
+> - how you contributed to testing, documentation and deployment
+>
+> The examiner may ask you to explain any part of the system, not only the part
+> you built, so read §4, §5 and §8 closely regardless of your contribution.
+
+---
+
+## 18. References
+
+Auditor General of Ghana (2022) *Report of the Auditor General on the Public
+Accounts of Ghana*. Accra: Ghana Audit Service.
+
+Anthropic (2026) *Claude API documentation*. Available at:
+https://docs.anthropic.com
+
+Laravel (2026) *Laravel 12 documentation*. Available at: https://laravel.com/docs
+
+Nielsen, J. (1994) 'Enhancing the explanatory power of usability heuristics',
+*Proceedings of the ACM CHI Conference on Human Factors in Computing Systems*,
+pp. 152–158.
+
+Nielsen Norman Group (2024) *10 Usability Heuristics for User Interface
+Design*. Available at: https://www.nngroup.com/articles/ten-usability-heuristics/
+
+Public Financial Management Act, 2016 (Act 921). Republic of Ghana.
+
+W3C (2023) *Web Content Accessibility Guidelines (WCAG) 2.2*. Available at:
+https://www.w3.org/TR/WCAG22/
+
+---
+
+*GovPay Desk, CSIT622 Capstone Project*

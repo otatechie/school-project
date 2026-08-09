@@ -364,29 +364,21 @@ export default function Index({ vouchers, stats, filters }: Props) {
                                                     className="border-b border-border transition-colors hover:bg-muted/50"
                                                 >
                                                     <td className="px-4 py-3">
-                                                        {editable ? (
-                                                            <Link
-                                                                href={
-                                                                    paymentVouchers.edit(
-                                                                        {
-                                                                            voucher:
-                                                                                voucher.id,
-                                                                        },
-                                                                    ).url
-                                                                }
-                                                                className="font-mono text-sm font-medium text-black underline-offset-4 hover:underline dark:text-white"
-                                                            >
-                                                                {
-                                                                    voucher.voucher_number
-                                                                }
-                                                            </Link>
-                                                        ) : (
-                                                            <span className="font-mono text-sm font-medium text-muted-foreground">
-                                                                {
-                                                                    voucher.voucher_number
-                                                                }
-                                                            </span>
-                                                        )}
+                                                        <Link
+                                                            href={
+                                                                paymentVouchers.show(
+                                                                    {
+                                                                        voucher:
+                                                                            voucher.id,
+                                                                    },
+                                                                ).url
+                                                            }
+                                                            className="font-mono text-sm font-medium text-black underline-offset-4 hover:underline dark:text-white"
+                                                        >
+                                                            {
+                                                                voucher.voucher_number
+                                                            }
+                                                        </Link>
                                                     </td>
                                                     <td className="hidden px-4 py-3 text-sm whitespace-nowrap text-muted-foreground lg:table-cell">
                                                         {

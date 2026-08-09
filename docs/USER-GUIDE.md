@@ -1,4 +1,4 @@
-# GovPay Desk — User Guide
+# GovPay Desk User Guide
 
 **Adentan Municipal Education Office**
 
@@ -22,7 +22,7 @@ payments. It assumes no technical knowledge. Each section covers one task.
 11. [Reports](#11-reports)
 12. [The audit log](#12-the-audit-log)
 13. [Managing staff](#13-managing-staff)
-14. [Your account](#14-your-account)
+14. [Your account, and signing out](#14-your-account)
 15. [Common questions](#15-common-questions)
 
 ---
@@ -57,6 +57,15 @@ These are not suggestions. The system refuses.
 2. Type your email address and password.
 3. Select **Log in**.
 
+![The sign-in page](images/01-sign-in.jpeg)
+
+*The sign-in page. The row of accounts at the bottom appears only on the
+demonstration system; select one to fill the form.*
+
+There is no self-registration. An administrator creates your account (section
+13) and gives you the email address and starting password to use. Change the
+password after your first sign-in.
+
 If you get the password wrong five times, the system stops accepting attempts
 for a minute. This protects the office against someone guessing passwords.
 
@@ -78,18 +87,23 @@ approves payments.
 |---|---|
 | **Payments** | The dashboard, payment vouchers, the approval queue, memos |
 | **Records** | Supporting documents, ledger transactions, chart of accounts, reports |
-| **Administration** | Departments, staff, roles, audit log — administrators only |
+| **Administration** | Departments, staff, roles, audit log (administrators only) |
 
 If you do not see the Administration group, you are not an administrator. That
 is normal.
 
 **The bar at the top** has:
 
-- the **bell**, showing anything waiting for you — a red number means unread
+- the **bell**, showing anything waiting for you; a red number means unread
 - **Quick Actions**, to start a new voucher or memo from anywhere
 - a **light and dark** switch
 
 On a phone, the menu is behind the button at the top left.
+
+![The dashboard](images/02-dashboard.png)
+
+*The dashboard. The amber bar lists what needs your attention, and the row of
+counts below shows how many payments sit at each stage.*
 
 ---
 
@@ -105,13 +119,19 @@ Every payment moves through the same stages, in order:
 
 | Stage | What it means | Who acts next |
 |---|---|---|
-| **Draft** | Being prepared. Nobody else has seen it. | You — finish and submit it |
+| **Draft** | Being prepared. Nobody else has seen it. | You: finish and submit it |
 | **Awaiting approval** | Submitted. Waiting for a decision. | An approver |
-| **Returned** | Sent back with a reason. Can be edited. | You — correct and resubmit |
+| **Returned** | Sent back with a reason. Can be edited. | You: correct and resubmit |
 | **Approved** | Cleared for payment. | The accountant |
 | **Paid** | Money released. Recorded in the ledger. | Optionally raise a memo |
 
 The dashboard shows how many vouchers sit at each stage.
+
+![The payment vouchers list](images/03-voucher-list.jpeg)
+
+*The voucher list. The status of each voucher decides which actions appear
+beside it: a draft can be submitted or edited, a returned voucher can be
+corrected, and a paid one can only be read.*
 
 ---
 
@@ -137,7 +157,12 @@ The dashboard shows how many vouchers sit at each stage.
 | Description | What the money is for, in plain words |
 | Budget line | Which budget the spending comes out of |
 
-3. Select **Create Payment Voucher**.
+3. Select **Create voucher**.
+
+![The new voucher form](images/04-voucher-form.jpeg)
+
+*The voucher form. Required fields carry a red asterisk. The date is shown
+again in words beneath the field so there is no doubt about which day it is.*
 
 The voucher is saved as a **draft**. It has a number like `PV-2026-014`. Nobody
 else sees it until you submit it.
@@ -147,11 +172,11 @@ else sees it until you submit it.
 As you fill in the form, the system quietly compares what you have entered
 against past payments. If something looks unusual, a yellow box appears:
 
-- **Possible duplicate** — the same payee was paid the same amount recently.
+- **Possible duplicate**: the same payee was paid the same amount recently.
   Check you are not paying an invoice twice.
-- **Unusually large** — the amount is far above what this department normally
+- **Unusually large**: the amount is far above what this department normally
   pays. Check the figure.
-- **Budget line may be wrong** — your description mentions fuel but the budget
+- **Budget line may be wrong**: your description mentions fuel but the budget
   line says office supplies, for example.
 
 **These are warnings, not errors.** Every one of them can be perfectly correct.
@@ -187,10 +212,10 @@ The system works out who should approve it, based on the amount:
 
 | Amount | Approval level |
 |---|---|
-| Up to GHS 5,000 | Level 1 — Routine |
-| Up to GHS 50,000 | Level 2 — Standard |
-| Up to GHS 250,000 | Level 3 — Senior |
-| Above GHS 250,000 | Level 4 — Executive |
+| Up to GHS 5,000 | Level 1: Routine |
+| Up to GHS 50,000 | Level 2: Standard |
+| Up to GHS 250,000 | Level 3: Senior |
+| Above GHS 250,000 | Level 4: Executive |
 
 Only approvers whose limit covers the amount are notified. A GHS 300,000
 payment does not appear in a junior officer's queue.
@@ -210,16 +235,16 @@ three days or more is marked in red.
 
 **Before deciding, look at:**
 
-- **Yellow warning boxes** — automatic checks that flagged something
-- **The approval band** — which level this amount falls into
-- **Supporting documents** — is the invoice attached?
+- **Yellow warning boxes**: automatic checks that flagged something
+- **The approval band**: which level this amount falls into
+- **Supporting documents**: is the invoice attached?
 
 ### Asking the AI for a second opinion
 
 Select **AI review**. The system sends the voucher and the department's recent
 payment history to Claude, an AI service, and shows back:
 
-- a risk level — low, medium or high
+- a risk level: low, medium or high
 - one sentence summarising the position
 - specific things to check
 
@@ -238,7 +263,7 @@ amount is above your limit. The reason is shown on screen.
 
 ### Returning a voucher
 
-Select **Return**, then write what needs correcting. Be specific — the preparer
+Select **Return**, then write what needs correcting. Be specific; the preparer
 sees exactly what you write, and a vague reason means another round trip.
 
 Good: *"The supplier invoice is not attached and the quantities do not match
@@ -288,8 +313,13 @@ select **Create memo**.
 
 ### Finishing a memo
 
-- **Finalize** — the memo is complete. It can no longer be edited.
-- **Mark printed** — a paper copy has been printed and filed.
+- **Finalize**: the memo is complete. It can no longer be edited.
+- **Mark printed**: a paper copy has been printed and filed.
+
+![The memo list](images/05-memos.jpeg)
+
+*The memo list. Only one action shows against each memo, and it is the one
+that comes next: finalize a draft, mark a finalized memo as printed.*
 
 ---
 
@@ -297,8 +327,8 @@ select **Create memo**.
 
 Under **Records → Reports**:
 
-- **By month** — what was paid each month, with a total for the year
-- **By department** — what each department spent, largest first
+- **By month**: what was paid each month, with a total for the year
+- **By department**: what each department spent, largest first
 
 Both cover **paid** vouchers only. Money that has been approved but not yet
 released is not spending yet.
@@ -309,10 +339,15 @@ Use the year selector at the top right to look at a different year.
 instead of printing, choose "Save as PDF" as the destination.
 
 Every time a report is printed, the system records who did it and when. This is
-deliberate — reports leave the office as evidence.
+deliberate: reports leave the office as evidence.
 
 The dashboard also shows two charts: spending per month over the last year, and
 spending per department this year.
+
+![Expenditure by department](images/06-report-department.jpeg)
+
+*Expenditure by department. Each row gives what has been paid and what is still
+pending, with the number of vouchers behind each figure.*
 
 ---
 
@@ -327,6 +362,11 @@ Nothing in the system can change or delete an entry. This is the record an
 auditor relies on, so it only ever grows.
 
 You can filter by action type or search the descriptions.
+
+![The audit log](images/07-audit-log.jpeg)
+
+*The audit log. Every row records what happened, who did it, and when. Reading
+down the entries for one voucher gives its whole history.*
 
 ---
 
@@ -345,10 +385,15 @@ You can filter by action type or search the descriptions.
 | **Finance Officer** | Prepare vouchers, attach documents, record payments |
 | **Viewer** | Read only. Cannot create or change anything. |
 
+![The roles page](images/08-roles.jpeg)
+
+*The roles page states what each role may do and lists who currently holds it.
+Approvers are shown with their individual limits.*
+
 ### Adding someone
 
 Select **Add user**, fill in their details, and choose a role. If you choose
-Approver, set their **approval limit** — the largest payment they may release.
+Approver, set their **approval limit**: the largest payment they may release.
 Leave it blank for no limit.
 
 New accounts start with the password `password`. Tell the person to change it
@@ -357,7 +402,7 @@ immediately under **Settings → Password**.
 ### When someone leaves
 
 Edit their account and switch **Active** off. They are signed out straight away
-and cannot sign back in. Their past vouchers and audit entries stay intact —
+and cannot sign back in. Their past vouchers and audit entries stay intact;
 the record of what they did must not disappear.
 
 You cannot remove your own administrator role. This stops the office
@@ -365,13 +410,25 @@ accidentally locking itself out.
 
 ---
 
-## 14. Your account
+## 14. Your account, and signing out
+
+Select your name at the top right of any page. The menu holds your account
+settings and the way out of the system.
 
 Under **Settings**:
 
-- **Profile** — your name, email and phone
-- **Password** — change your password
-- **Two-Factor Auth** — add the second sign-in step
+- **Profile**: your name, email and phone
+- **Password**: change your password
+- **Two-Factor Auth**: add the second sign-in step
+
+### Signing out
+
+Select your name at the top right, then **Log out**.
+
+Sign out whenever you leave the computer, particularly on a shared machine.
+Everything you have saved is kept; only drafts you were part-way through typing
+and had not saved are lost. Closing the browser without signing out leaves your
+session open on that machine.
 
 ---
 
@@ -382,7 +439,7 @@ It has been submitted. Only drafts and returned vouchers can be edited. Ask an
 approver to return it.
 
 **The Approve button is greyed out.**
-Either you prepared it — the same person cannot prepare and approve — or the
+Either you prepared it (the same person cannot prepare and approve) or the
 amount is above your limit. The reason is on screen.
 
 **I got a warning but the payment is correct.**
@@ -391,7 +448,7 @@ approver sees the same warning and can judge for themselves.
 
 **The AI review is not working.**
 The office may not have it switched on, or the service may be briefly
-unavailable. Approve or return using your own judgement — nothing else changes.
+unavailable. Approve or return using your own judgement; nothing else changes.
 
 **I paid the wrong voucher.**
 Payments cannot be reversed in the system. Speak to your administrator; the
@@ -406,4 +463,4 @@ You are not an administrator. Ask one if you need something from it.
 
 ---
 
-*GovPay Desk — Adentan Municipal Education Office*
+*GovPay Desk, Adentan Municipal Education Office*

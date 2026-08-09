@@ -50,8 +50,8 @@ export default function PrintReport({
 }: Props) {
     const title =
         report === 'monthly'
-            ? `Expenditure by Month — ${year}`
-            : `Expenditure by Department — ${year}`;
+            ? `Expenditure by month, ${year}`
+            : `Expenditure by department, ${year}`;
 
     // Open the print dialog once the page has rendered, which is what the
     // person clicking "Print report" was asking for.

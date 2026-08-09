@@ -120,6 +120,22 @@ blockquote {
 
 hr { border: 0; border-top: 1px solid #dfe2e7; margin: 16pt 0; }
 
+/* Screenshots. The border matters: most captures are of a dark interface, so
+   without one the image bleeds into the page with no edge to read it against. */
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 4pt 0 3pt;
+    border: 1px solid #c9ccd2;
+    border-radius: 3px;
+    page-break-inside: avoid;
+}
+
+/* An italic line directly under an image is its caption. */
+img + em, p > img + em { display: block; }
+p:has(img) { margin-bottom: 12pt; page-break-inside: avoid; }
+
 strong { font-weight: 600; color: #0b0c0f; }
 
 .cover {

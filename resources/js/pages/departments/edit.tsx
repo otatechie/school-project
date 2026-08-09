@@ -111,7 +111,7 @@ export default function DepartmentsEdit({ department }: Props) {
                                     htmlFor="is_active"
                                     className="font-normal"
                                 >
-                                    Active — can be selected on new vouchers
+                                    Active: can be selected on new vouchers
                                 </Label>
                             </div>
                             <InputError message={errors.is_active} />

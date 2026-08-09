@@ -43,19 +43,19 @@ const breadcrumbs: BreadcrumbItem[] = [
 type Department = { id: string; name: string; code: string };
 
 const FIELD_LABELS: Record<string, string> = {
-    voucher_date: 'Voucher Date',
+    voucher_date: 'Voucher date',
     department_id: 'Department',
-    payee_name: 'Payee Name',
-    payee_phone: 'Payee Phone',
-    payee_bank: 'Bank Name',
-    payee_account_number: 'Account Number',
+    payee_name: 'Payee name',
+    payee_phone: 'Payee phone',
+    payee_bank: 'Bank name',
+    payee_account_number: 'Account number',
     amount: 'Amount',
-    payment_method: 'Payment Method',
-    cheque_number: 'Cheque Number',
-    payment_reference: 'Payment Reference',
+    payment_method: 'Payment method',
+    cheque_number: 'Cheque number',
+    payment_reference: 'Payment reference',
     description: 'Description',
-    budget_line: 'Budget Line',
-    budget_code: 'Budget Code',
+    budget_line: 'Budget line',
+    budget_code: 'Budget code',
 };
 
 export default function Create({ departments }: { departments: Department[] }) {
@@ -240,7 +240,7 @@ export default function Create({ departments }: { departments: Department[] }) {
                                 <div className="grid gap-x-5 gap-y-3.5 md:grid-cols-2">
                                     <div className="space-y-1.5">
                                         <Label htmlFor="payee_name">
-                                            Payee Name{' '}
+                                            Payee name{' '}
                                             <span className="text-destructive">
                                                 *
                                             </span>
@@ -264,7 +264,7 @@ export default function Create({ departments }: { departments: Department[] }) {
 
                                     <div className="space-y-1.5">
                                         <Label htmlFor="payee_phone">
-                                            Payee Phone
+                                            Payee phone
                                         </Label>
                                         <Input
                                             id="payee_phone"
@@ -285,7 +285,7 @@ export default function Create({ departments }: { departments: Department[] }) {
 
                                     <div className="space-y-1.5">
                                         <Label htmlFor="payee_bank">
-                                            Bank Name
+                                            Bank name
                                         </Label>
                                         <Input
                                             id="payee_bank"
@@ -306,7 +306,7 @@ export default function Create({ departments }: { departments: Department[] }) {
 
                                     <div className="space-y-1.5">
                                         <Label htmlFor="payee_account_number">
-                                            Account Number
+                                            Account number
                                         </Label>
                                         <Input
                                             id="payee_account_number"
@@ -372,7 +372,7 @@ export default function Create({ departments }: { departments: Department[] }) {
 
                                     <div className="space-y-1.5">
                                         <Label htmlFor="payment_method">
-                                            Payment Method{' '}
+                                            Payment method{' '}
                                             <span className="text-destructive">
                                                 *
                                             </span>
@@ -406,7 +406,7 @@ export default function Create({ departments }: { departments: Department[] }) {
                                     {data.payment_method === 'cheque' && (
                                         <div className="space-y-1.5">
                                             <Label htmlFor="cheque_number">
-                                                Cheque Number{' '}
+                                                Cheque number{' '}
                                                 <span className="text-destructive">
                                                     *
                                                 </span>
@@ -430,7 +430,7 @@ export default function Create({ departments }: { departments: Department[] }) {
 
                                     <div className="space-y-1.5">
                                         <Label htmlFor="payment_reference">
-                                            Payment Reference
+                                            Payment reference
                                         </Label>
                                         <Input
                                             id="payment_reference"
@@ -476,7 +476,7 @@ export default function Create({ departments }: { departments: Department[] }) {
                                 <div className="grid gap-x-5 gap-y-3.5 md:grid-cols-2">
                                     <div className="space-y-1.5">
                                         <Label htmlFor="budget_line">
-                                            Budget Line{' '}
+                                            Budget line{' '}
                                             <span className="text-destructive">
                                                 *
                                             </span>
@@ -520,7 +520,7 @@ export default function Create({ departments }: { departments: Department[] }) {
 
                                     <div className="space-y-1.5">
                                         <Label htmlFor="budget_code">
-                                            Budget Code
+                                            Budget code
                                         </Label>
                                         <Input
                                             id="budget_code"
@@ -562,7 +562,7 @@ export default function Create({ departments }: { departments: Department[] }) {
                                             Creating...
                                         </>
                                     ) : (
-                                        'New payment voucher'
+                                        'Create voucher'
                                     )}
                                 </Button>
                             </div>
