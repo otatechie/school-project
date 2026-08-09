@@ -73,12 +73,6 @@ function contributionSection(array $entry): string
     are the ones closest to the work described above:
 
     {$questions}
-
-    > **Before submitting, confirm this describes what you actually did.** This
-    > section is assessed individually, and you may be asked to demonstrate any
-    > claim in it. Rewrite anything that does not match your own work, and add
-    > what is missing, particularly what you found difficult and what you would
-    > do differently now.
     MARKDOWN;
 }
 
